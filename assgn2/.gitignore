@@ -8,13 +8,8 @@
 !*.l
 !*.h
 !makefile
-!Makefile
 !.gitignore
 !README.md
-
-# Track everything in the src directory
-!src/
-!src/**
 
 # Track everything in the test directory
 !test/
