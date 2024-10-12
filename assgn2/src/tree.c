@@ -140,6 +140,9 @@ void printAst(tree *t, int level) {
             case DECL:
                 printf("decl\n");
                 break;
+            case VARDECL:
+                printf("varDecl\n");
+                break;
             case FUNDECL:
                 printf("funDecl\n");
                 break;
@@ -200,6 +203,39 @@ void printAst(tree *t, int level) {
                     case OPER_DIV: printf("/\n"); break;
                     default: printf("unknown\n");
                 }
+                break;
+            case VAR:
+                printf("var\n");
+                break;
+            case ARRAYDECL:
+                printf("arrayDecl\n");
+                break;
+            case CONDSTMT:
+                printf("condStmt\n");
+                break;
+            case LOOPSTMT:
+                printf("loopStmt\n");
+                break;
+            case RETURNSTMT:
+                printf("returnStmt\n");
+                break;
+            case RELOP:
+                printf("relop,");
+                switch(t->val) {
+                    case OPER_LT: printf("<\n"); break;
+                    case OPER_LTE: printf("<=\n"); break;
+                    case OPER_GT: printf(">\n"); break;
+                    case OPER_GTE: printf(">=\n"); break;
+                    case OPER_EQ: printf("==\n"); break;
+                    case OPER_NEQ: printf("!=\n"); break;
+                    default: printf("unknown\n");
+                }
+                break;
+            case FUNCCALLEXPR:
+                printf("funcCallExpr\n");
+                break;
+            case ARGLIST:
+                printf("argList\n");
                 break;
             default:
                 printf("%s\n", nodeTypeStrings[t->nodeKind]);

@@ -241,8 +241,12 @@ statement : assignStmt
 assignStmt : var OPER_ASGN expression SEMICLN
            {
                $$ = maketree(ASSIGNSTMT, 0);
-               addChild($$, $1);
-               addChild($$, $3);
+               addChild($$, $1);  // var
+               tree *exprNode = maketree(EXPRESSION, 0);
+               addChild(exprNode, $3);  // Wrap the existing expression
+               addChild($$, exprNode);  // Add the EXPRESSION node to ASSIGNSTMT
+               printf("DEBUG: Created ASSIGNSTMT with %d children\n", $$->numChildren);
+               printf("DEBUG: Second child of ASSIGNSTMT is of type %d\n", $$->children[1]->nodeKind);
            }
            ;
 
@@ -277,8 +281,8 @@ var : ID
 
 expression : addExpr
            {
-               /*printf("DEBUG: Reducing expression\n");*/
-               $$ = $1;
+               $$ = maketree(EXPRESSION, 0);
+               addChild($$, $1);
            }
            | expression relop addExpr
            {
