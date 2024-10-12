@@ -1,14 +1,14 @@
 CC = gcc
 CFLAGS = -I./src -std=gnu99
 
-LEX=lex
+LEX=flex
 
-YACC=yacc
+YACC=bison -y
 YFLAGS=-v -d -b obj/y
 GRAMMAR=parser.y
 
 obj/mcc: obj/lex.yy.o obj/y.tab.o obj/tree.o obj/driver.o obj/strtab.o | obj
-	$(CC) $(CFLAGS) -o $@ $^ -ll
+	$(CC) $(CFLAGS) -o $@ $^ -lfl
 
 obj/y.tab.o: obj/y.tab.c | obj
 	$(CC) $(CFLAGS) -c $< -o $@

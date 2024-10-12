@@ -4,6 +4,9 @@
 %{
 #include<stdio.h>
 #include"../obj/y.tab.h"
+#include <stdio.h>
+#include "y.tab.h"
+#include "parser.h"
 
 int scancol = 1;
 int yycol = 1;
