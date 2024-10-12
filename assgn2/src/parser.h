@@ -1,6 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "y.tab.h"
+
 int yyparse(void);
 int yylex(void);
 int yyerror(char *s);

@@ -124,21 +124,24 @@ varDecl         : typeSpec ID SEMICLN
 
 funDecl : typeSpec ID LPAREN formalDeclList RPAREN compoundStmt
         {
-            $$ = maketree(FUNDECL, 0);
+            $$ = maketree(DECL, 0);
+            tree *funDeclNode = maketree(FUNDECL, 0);
+            addChild($$, funDeclNode);
+            
             tree *funcTypeName = maketree(FUNCTYPENAME, 0);
+            addChild(funDeclNode, funcTypeName);
             addChild(funcTypeName, $1);  // typeSpec
             addChild(funcTypeName, maketree(IDENTIFIER, 0));
             funcTypeName->children[1]->strval = $2;  // ID
-            addChild($$, funcTypeName);
-            addChild($$, $4);  // formalDeclList
-            tree *funBody = maketree(FUNBODY, 0);
-            addChild(funBody, $6);  // compoundStmt
-            addChild($$, funBody);
             
-            // Update scope for symbol table
+            addChild(funDeclNode, $4);  // formalDeclList
+            
+            tree *funBody = maketree(FUNBODY, 0);
+            addChild(funDeclNode, funBody);
+            addChild(funBody, $6);  // compoundStmt
+            
             scope = $2;
             ST_insert($2, "", $1->val, FUNCTION);
-            
             scope = "";  // Reset to global scope after function
         }
         | typeSpec ID LPAREN RPAREN compoundStmt
@@ -211,9 +214,10 @@ localDeclList : /* empty */
               }
               ;
 
-statementList : /* empty */
+statementList : statement
               {
                   $$ = maketree(STATEMENTLIST, 0);
+                  addChild($$, $1);
               }
               | statementList statement
               {
@@ -230,14 +234,15 @@ statement : assignStmt
           | expression SEMICLN
           {
               $$ = maketree(STATEMENT, 0);
-              addChild($$, $1);
+              addChild($$, maketree(ASSIGNSTMT, 0));
+              addChild($$->children[0], $1);
           }
           ;
 assignStmt : var OPER_ASGN expression SEMICLN
            {
                $$ = maketree(ASSIGNSTMT, 0);
-               addChild($$, $1);  // var
-               addChild($$, $3);  // expression
+               addChild($$, $1);
+               addChild($$, $3);
            }
            ;
 
@@ -344,12 +349,11 @@ relop : OPER_LT
 
 addExpr : mulExpr
         {
-            /*printf("DEBUG: Reducing addExpr (mulExpr)\n");*/
-            $$ = $1;
+            $$ = maketree(ADDEXPR, 0);
+            addChild($$, $1);
         }
         | addExpr addop mulExpr
         {
-            /*printf("DEBUG: Reducing addExpr (addExpr addop mulExpr)\n");*/
             $$ = maketree(ADDEXPR, 0);
             addChild($$, $1);
             addChild($$, $2);
@@ -374,10 +378,11 @@ mulExpr : factor
         }
         | mulExpr mulop factor
         {
-            $$ = maketree(TERM, 0);
-            addChild($$, $1);
-            addChild($$, $2);
-            addChild($$, $3);
+            tree *newTerm = maketree(TERM, 0);
+            addChild(newTerm, $1);
+            addChild(newTerm, $2);
+            addChild(newTerm, $3);
+            $$ = newTerm;
         }
         ;
 
