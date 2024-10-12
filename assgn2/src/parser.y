@@ -366,7 +366,7 @@ mulop : OPER_MUL
 
 factor : LPAREN expression RPAREN
        {
-           $$ = $2;  // We don't need a separate node for parentheses
+           $$ = $2;  
        }
        | var
        | funcCallExpr
@@ -420,12 +420,12 @@ argList : expression
 typeSpec : KWD_INT
          {
              $$ = maketree(TYPESPEC);
-             $$->val = NODE_KWD_INT;  // Changed this
+             $$->val = NODE_KWD_INT;  
          }
          | KWD_CHAR
          {
              $$ = maketree(TYPESPEC);
-             $$->val = NODE_KWD_CHAR;  // Changed this
+             $$->val = NODE_KWD_CHAR;  
          }
          | KWD_VOID
          {

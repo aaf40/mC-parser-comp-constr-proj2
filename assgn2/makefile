@@ -42,3 +42,13 @@ clean:
 
 test: obj/mcc
 	@python ./test/testParser.py
+
+fulltest: obj/mcc
+	@for file in test/*.mC; do \
+		echo "Testing $$file:"; \
+		./obj/mcc $$file < /dev/null > "$$file.out" 2>&1 || echo "Error occurred"; \
+		cat "$$file.out"; \
+		echo "Exit status: $$?"; \
+		echo ""; \
+	done
+	@rm -f test/*.out
