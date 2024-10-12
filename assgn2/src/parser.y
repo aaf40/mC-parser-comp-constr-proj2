@@ -11,14 +11,8 @@ extern int yylineno;
 int yylex(void);
 int yyerror(char *s);
 
-/* nodeTypes refer to different types of internal and external nodes that can be part of the abstract syntax tree.*/
-enum nodeTypes {PROGRAM, DECLLIST, DECL, VARDECL, TYPESPEC, FUNDECL,
-                FORMALDECLLIST, FORMALDECL, FUNBODY, LOCALDECLLIST,
-                STATEMENTLIST, STATEMENT, COMPOUNDSTMT, ASSIGNSTMT,
-                CONDSTMT, LOOPSTMT, RETURNSTMT, EXPRESSION, RELOP,
-                ADDEXPR, ADDOP, TERM, MULOP, FACTOR, FUNCCALLEXPR,
-                ARGLIST, INTEGER, IDENTIFIER, VAR, ARRAYDECL, CHAR,
-                FUNCTYPENAME};
+
+
 
 enum opType {ADD, SUB, MUL, DIV, LT, LTE, EQ, GTE, GT, NEQ};
 
@@ -426,12 +420,12 @@ argList : expression
 typeSpec : KWD_INT
          {
              $$ = maketree(TYPESPEC);
-             $$->val = KWD_INT;
+             $$->val = NODE_KWD_INT;  // Changed this
          }
          | KWD_CHAR
          {
              $$ = maketree(TYPESPEC);
-             $$->val = KWD_CHAR;
+             $$->val = NODE_KWD_CHAR;  // Changed this
          }
          | KWD_VOID
          {

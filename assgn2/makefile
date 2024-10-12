@@ -10,26 +10,26 @@ GRAMMAR=parser.y
 obj/mcc: obj/lex.yy.o obj/y.tab.o obj/tree.o obj/driver.o obj/strtab.o | obj
 	$(CC) $(CFLAGS) -o $@ $^ -lfl
 
+obj/y.tab.h obj/y.tab.c: src/$(GRAMMAR) src/tree.h | obj
+	$(YACC) $(YFLAGS) $<
+
 obj/y.tab.o: obj/y.tab.c | obj
 	$(CC) $(CFLAGS) -c $< -o $@
 
 obj/lex.yy.o: obj/lex.yy.c | obj
 	$(CC) $(CFLAGS) -c $< -o $@
 
-obj/y.tab.h obj/y.tab.c: src/$(GRAMMAR)  src/tree.h | obj
-	$(YACC) $(YFLAGS) $<
-
 obj/lex.yy.c: src/scanner.l obj/y.tab.h | obj
 	$(LEX) -o $@ $<
 
-obj/tree.o: src/tree.c src/tree.h | obj
-	$(CC)  $(CFLAGS) -c $< -o $@
+obj/tree.o: src/tree.c src/tree.h obj/y.tab.h | obj
+	$(CC) $(CFLAGS) -c $< -o $@
 
 obj/driver.o: src/driver.c src/tree.h obj/y.tab.h | obj
-	$(CC)  $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 obj/strtab.o: src/strtab.c src/strtab.h obj/y.tab.h | obj
-	$(CC)  $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: clean test objdir
 
