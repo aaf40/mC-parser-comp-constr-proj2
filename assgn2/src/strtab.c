@@ -3,10 +3,6 @@
 #include <string.h>
 #include "strtab.h"
 
-#define MAXIDS 1000
-#define MAX_ID_LENGTH 50
-#define MAX_SCOPE_LENGTH 100
-
 struct strEntry strTable[MAXIDS];
 
 const char* dataTypeStrings[] = {"int", "char", "void"};
