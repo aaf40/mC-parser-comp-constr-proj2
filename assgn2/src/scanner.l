@@ -113,7 +113,7 @@ void countLines(){
 #undef yylex
 int get_token(void) {
     int token = yylex();
-    printf("DEBUG: Scanned token: %d (%s)\n", token, yytext);
+    /*printf("DEBUG: Scanned token: %d (%s)\n", token, yytext);*/
     fflush(stdout);
     return token;
 }

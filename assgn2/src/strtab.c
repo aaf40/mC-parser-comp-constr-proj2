@@ -30,7 +30,7 @@ void ST_init() {
 }
 
 int ST_insert(char *id, char *scope, int data_type, int symbol_type) {
-    printf("DEBUG: Inserting %s in scope %s with type %d and symbol type %d\n", id, scope, data_type, symbol_type);
+    /*printf("DEBUG: Inserting %s in scope %s with type %d and symbol type %d\n", id, scope, data_type, symbol_type);*/
     char key[MAX_ID_LENGTH + MAX_SCOPE_LENGTH];
     snprintf(key, sizeof(key), "%s_%s", scope, id);
     
@@ -69,7 +69,7 @@ int ST_insert(char *id, char *scope, int data_type, int symbol_type) {
 }
 
 int ST_lookup(char *id, char *scope) {
-    printf("DEBUG: Looking up %s in scope %s\n", id, scope);
+    /*printf("DEBUG: Looking up %s in scope %s\n", id, scope);*/
     char key[MAX_ID_LENGTH + MAX_SCOPE_LENGTH];
     snprintf(key, sizeof(key), "%s_%s", scope, id);
     

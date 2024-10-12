@@ -8,35 +8,34 @@ int yyparse(void);
 extern tree *ast;  // Add this line if it's not already present
 
 int main() {
-    printf("DEBUG: Starting main function\n");
+    /*printf("DEBUG: Starting main function\n");
     fflush(stdout);
     ST_init();  // Initialize the symbol table
     printf("DEBUG: Symbol table initialized\n");
     fflush(stdout);
     printf("DEBUG: About to start parsing\n");
-    fflush(stdout);
+    fflush(stdout);*/
     if (!yyparse()){
-        printf("DEBUG: Parsing completed. About to print AST.\n");
-        fflush(stdout);
+        /*printf("DEBUG: Parsing completed. About to print AST.\n");
+        fflush(stdout);*/
         if (ast != NULL) {
-            printf("DEBUG: AST is not NULL, about to print\n");
-            fflush(stdout);
-            printAst(ast, 0);  // Assuming printAst takes two arguments: the tree and an initial indentation level
+            printf("AST:\n");
+            printAst(ast, 0);
         } else {
             printf("ERROR: AST is NULL\n");
             fflush(stdout);
         }
-        printf("DEBUG: AST printing completed. About to free AST.\n");
+        /*printf("DEBUG: AST printing completed. About to free AST.\n");
         fflush(stdout);
         freeAst(ast);
         printf("DEBUG: AST freed. About to free symbol table.\n");
         fflush(stdout);
         ST_free();
         printf("DEBUG: Symbol table freed. Exiting main function.\n");
-        fflush(stdout);
+        fflush(stdout);*/
     } else {
         printf("ERROR: Parsing failed\n");
     }
-    printf("DEBUG: Exiting main function\n");
+    /*printf("DEBUG: Exiting main function\n");*/
     return 0;
 }

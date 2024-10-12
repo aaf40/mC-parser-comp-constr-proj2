@@ -69,21 +69,21 @@ char* scope = "";
 %%
 /* TODO: Your grammar and semantic actions go here. We provide with two example productions and their associated code for adding non-terminals to the AST.*/
 
-program         : { printf("DEBUG: Entering program rule\n"); fflush(stdout); }
+program         : { /*printf("DEBUG: Entering program rule\n"); fflush(stdout); */ }
                   declList
                  {
-                    printf("DEBUG: Reducing program\n");
-                    tree* progNode = maketree(PROGRAM);
+                    /*printf("DEBUG: Reducing program\n");*/
+                    tree* progNode = maketree(PROGRAM, 0);
                     addChild(progNode, $2);  // Note: changed $1 to $2
                     ast = progNode;
                     $$ = progNode;
                  }
                 ;
 
-declList        : { printf("DEBUG: Entering declList rule\n"); fflush(stdout); }
+declList        : { /*printf("DEBUG: Entering declList rule\n"); fflush(stdout); */ }
                   decl
                  {
-                    tree* declListNode = maketree(DECLLIST);
+                    tree* declListNode = maketree(DECLLIST, 0);
                     addChild(declListNode, $2);  // Note: changed $1 to $2
                     $$ = declListNode;
                  }
@@ -100,22 +100,22 @@ decl            : varDecl
 
 varDecl         : typeSpec ID SEMICLN
                 {
-                    printf("DEBUG: Reducing varDecl: %s\n", $2);
-                    $$ = maketree(VARDECL);
+                    /*printf("DEBUG: Reducing varDecl: %s\n", $2);*/
+                    $$ = maketree(VARDECL, 0);
                     addChild($$, $1);  // typeSpec
-                    addChild($$, maketree(IDENTIFIER));
+                    addChild($$, maketree(IDENTIFIER, 0));
                     $$->children[1]->strval = $2;
                     int dataType = $1->val;
-                    printf("DEBUG: Inserting variable %s with type %d\n", $2, dataType);
+                    /*printf("DEBUG: Inserting variable %s with type %d\n", $2, dataType);*/
                     ST_insert($2, scope, dataType, SCALAR);
                 }
                 | typeSpec ID LSQ_BRKT INTCONST RSQ_BRKT SEMICLN
                 {
-                    $$ = maketree(VARDECL);
+                    $$ = maketree(VARDECL, 0);
                     addChild($$, $1);  // typeSpec
-                    addChild($$, maketree(IDENTIFIER));
+                    addChild($$, maketree(IDENTIFIER, 0));
                     $$->children[1]->strval = $2;
-                    addChild($$->children[1], maketree(INTEGER));
+                    addChild($$->children[1], maketree(INTEGER, $4));
                     $$->children[1]->children[0]->val = $4;  // array size
                     int dataType = $1->val;  // Assuming typeSpec sets this value
                     ST_insert($2, scope, dataType, ARRAY);
@@ -124,9 +124,9 @@ varDecl         : typeSpec ID SEMICLN
 
 funDecl : typeSpec ID LPAREN formalDeclList RPAREN compoundStmt
         {
-            $$ = maketree(FUNDECL);
+            $$ = maketree(FUNDECL, 0);
             addChild($$, $1);  // typeSpec
-            addChild($$, maketree(IDENTIFIER));
+            addChild($$, maketree(IDENTIFIER, 0));
             $$->children[1]->strval = $2;  // ID
             addChild($$, $4);  // formalDeclList
             addChild($$, $6);  // compoundStmt
@@ -139,11 +139,11 @@ funDecl : typeSpec ID LPAREN formalDeclList RPAREN compoundStmt
         }
         | typeSpec ID LPAREN RPAREN compoundStmt
         {
-            $$ = maketree(FUNDECL);
+            $$ = maketree(FUNDECL, 0);
             addChild($$, $1);  // typeSpec
-            addChild($$, maketree(IDENTIFIER));
+            addChild($$, maketree(IDENTIFIER, 0));
             $$->children[1]->strval = $2;  // ID
-            addChild($$, maketree(FORMALDECLLIST));  // empty formal decl list
+            addChild($$, maketree(FORMALDECLLIST, 0));  // empty formal decl list
             addChild($$, $5);  // compoundStmt
             
             // Update scope for symbol table
@@ -156,7 +156,7 @@ funDecl : typeSpec ID LPAREN formalDeclList RPAREN compoundStmt
 
 formalDeclList : formalDecl
                 {
-                    $$ = maketree(FORMALDECLLIST);
+                    $$ = maketree(FORMALDECLLIST, 0);
                     addChild($$, $1);
                 }
                 | formalDeclList COMMA formalDecl
@@ -168,17 +168,17 @@ formalDeclList : formalDecl
 
 formalDecl : typeSpec ID
            {
-               $$ = maketree(FORMALDECL);
+               $$ = maketree(FORMALDECL, 0);
                addChild($$, $1);
-               addChild($$, maketree(IDENTIFIER));
+               addChild($$, maketree(IDENTIFIER, 0));
                $$->children[1]->strval = $2;
                ST_insert($2, scope, $1->val, SCALAR);
            }
            | typeSpec ID LSQ_BRKT RSQ_BRKT
            {
-               $$ = maketree(FORMALDECL);
+               $$ = maketree(FORMALDECL, 0);
                addChild($$, $1);
-               addChild($$, maketree(ARRAYDECL));
+               addChild($$, maketree(ARRAYDECL, 0));
                $$->children[1]->strval = $2;
                ST_insert($2, scope, $1->val, ARRAY);
            }
@@ -186,7 +186,7 @@ formalDecl : typeSpec ID
 
 compoundStmt : LCRLY_BRKT localDeclList statementList RCRLY_BRKT
              {
-                 $$ = maketree(COMPOUNDSTMT);
+                 $$ = maketree(COMPOUNDSTMT, 0);
                  addChild($$, $2);  // localDeclList
                  addChild($$, $3);  // statementList
              }
@@ -194,7 +194,7 @@ compoundStmt : LCRLY_BRKT localDeclList statementList RCRLY_BRKT
 
 localDeclList : /* empty */
               {
-                  $$ = maketree(LOCALDECLLIST);
+                  $$ = maketree(LOCALDECLLIST, 0);
               }
               | localDeclList varDecl
               {
@@ -205,7 +205,7 @@ localDeclList : /* empty */
 
 statementList : /* empty */
               {
-                  $$ = maketree(STATEMENTLIST);
+                  $$ = maketree(STATEMENTLIST, 0);
               }
               | statementList statement
               {
@@ -221,13 +221,13 @@ statement : assignStmt
           | compoundStmt
           | expression SEMICLN
           {
-              $$ = maketree(STATEMENT);
+              $$ = maketree(STATEMENT, 0);
               addChild($$, $1);
           }
           ;
 assignStmt : var OPER_ASGN expression SEMICLN
            {
-               $$ = maketree(ASSIGNSTMT);
+               $$ = maketree(ASSIGNSTMT, 0);
                addChild($$, $1);  // var
                addChild($$, $3);  // expression
            }
@@ -235,23 +235,23 @@ assignStmt : var OPER_ASGN expression SEMICLN
 
 var : ID
     {
-        printf("DEBUG: Processing var: %s\n", $1);
-        $$ = maketree(VAR);
-        addChild($$, maketree(IDENTIFIER));
+        /*printf("DEBUG: Processing var: %s\n", $1);*/
+        $$ = maketree(VAR, 0);
+        addChild($$, maketree(IDENTIFIER, 0));
         $$->children[0]->strval = $1;
         if (ST_lookup($1, scope) == -1) {
-            printf("DEBUG: Variable %s not found in symbol table\n", $1);
+            /*printf("DEBUG: Variable %s not found in symbol table\n", $1);*/
             char error_msg[100];
             snprintf(error_msg, sizeof(error_msg), "Undeclared variable: %s", $1);
             yyerror(error_msg);
         } else {
-            printf("DEBUG: Variable %s found in symbol table\n", $1);
+            /*printf("DEBUG: Variable %s found in symbol table\n", $1);*/
         }
     }
     | ID LSQ_BRKT expression RSQ_BRKT
     {
-        $$ = maketree(VAR);
-        addChild($$, maketree(ARRAYDECL));
+        $$ = maketree(VAR, 0);
+        addChild($$, maketree(ARRAYDECL, 0));
         $$->children[0]->strval = $1;
         addChild($$->children[0], $3);  // array index expression
         if (ST_lookup($1, scope) == -1) {
@@ -264,12 +264,12 @@ var : ID
 
 expression : addExpr
            {
-               printf("DEBUG: Reducing expression\n");
+               /*printf("DEBUG: Reducing expression\n");*/
                $$ = $1;
            }
            | expression relop addExpr
            {
-               $$ = maketree(EXPRESSION);
+               $$ = maketree(EXPRESSION, 0);
                addChild($$, $1);
                addChild($$, $2);
                addChild($$, $3);
@@ -278,14 +278,14 @@ expression : addExpr
 
 condStmt : KWD_IF LPAREN expression RPAREN statement %prec LOWER_THAN_ELSE
          {
-             $$ = maketree(CONDSTMT);
+             $$ = maketree(CONDSTMT, 0);
              addChild($$, $3);  // condition
              addChild($$, $5);  // if-body
              addChild($$, NULL);  // no else-body
          }
          | KWD_IF LPAREN expression RPAREN statement KWD_ELSE statement
          {
-             $$ = maketree(CONDSTMT);
+             $$ = maketree(CONDSTMT, 0);
              addChild($$, $3);  // condition
              addChild($$, $5);  // if-body
              addChild($$, $7);  // else-body
@@ -294,57 +294,55 @@ condStmt : KWD_IF LPAREN expression RPAREN statement %prec LOWER_THAN_ELSE
 
 returnStmt : KWD_RETURN SEMICLN
            {
-               $$ = maketree(RETURNSTMT);
+               $$ = maketree(RETURNSTMT, 0);
                addChild($$, NULL);  // void return
            }
            | KWD_RETURN expression SEMICLN
            {
-               $$ = maketree(RETURNSTMT);
+               $$ = maketree(RETURNSTMT, 0);
                addChild($$, $2);  // return with value
            }
            ;
 
 relop : OPER_LT
       {
-          $$ = maketree(RELOP);
-          $$->opType = LT;
+          $$ = maketree(RELOP, OPER_LT);
       }
       | OPER_LTE
       {
-          $$ = maketree(RELOP);
-          $$->opType = LTE;
+          $$ = maketree(RELOP, OPER_LTE);
       }
       | OPER_GT
       {
-          $$ = maketree(RELOP);
+          $$ = maketree(RELOP, 0);
           $$->opType = GT;
       }
       | OPER_GTE
       {
-          $$ = maketree(RELOP);
+          $$ = maketree(RELOP, 0);
           $$->opType = GTE;
       }
       | OPER_EQ
       {
-          $$ = maketree(RELOP);
+          $$ = maketree(RELOP, 0);
           $$->opType = EQ;
       }
       | OPER_NEQ
       {
-          $$ = maketree(RELOP);
+          $$ = maketree(RELOP, 0);
           $$->opType = NEQ;
       }
       ;
 
 addExpr : mulExpr
         {
-            printf("DEBUG: Reducing addExpr (mulExpr)\n");
+            /*printf("DEBUG: Reducing addExpr (mulExpr)\n");*/
             $$ = $1;
         }
         | addExpr addop mulExpr
         {
-            printf("DEBUG: Reducing addExpr (addExpr addop mulExpr)\n");
-            $$ = maketree(ADDEXPR);
+            /*printf("DEBUG: Reducing addExpr (addExpr addop mulExpr)\n");*/
+            $$ = maketree(ADDEXPR, 0);
             addChild($$, $1);
             addChild($$, $2);
             addChild($$, $3);
@@ -353,24 +351,22 @@ addExpr : mulExpr
 
 addop : OPER_ADD
       {
-          $$ = maketree(ADDOP);
-          $$->opType = ADD;
+          $$ = maketree(ADDOP, OPER_ADD);
       }
       | OPER_SUB
       {
-          $$ = maketree(ADDOP);
-          $$->opType = SUB;
+          $$ = maketree(ADDOP, OPER_SUB);
       }
       ;
 
 mulExpr : factor
         {
-            $$ = maketree(TERM);
+            $$ = maketree(TERM, 0);
             addChild($$, $1);
         }
         | mulExpr mulop factor
         {
-            $$ = maketree(TERM);
+            $$ = maketree(TERM, 0);
             addChild($$, $1);
             addChild($$, $2);
             addChild($$, $3);
@@ -379,13 +375,11 @@ mulExpr : factor
 
 mulop : OPER_MUL
       {
-          $$ = maketree(MULOP);
-          $$->opType = MUL;
+          $$ = maketree(MULOP, OPER_MUL);
       }
       | OPER_DIV
       {
-          $$ = maketree(MULOP);
-          $$->opType = DIV;
+          $$ = maketree(MULOP, OPER_DIV);
       }
       ;
 
@@ -409,15 +403,14 @@ factor : var
 
 integer : INTCONST
         {
-            $$ = maketree(INTEGER);
-            $$->val = $1;  // This is correct, as $1 is of type <value>
+            $$ = maketree(INTEGER, $1);
         }
         ;
 
 funcCallExpr : ID LPAREN argList RPAREN
              {
-                 $$ = maketree(FUNCCALLEXPR);
-                 addChild($$, maketree(IDENTIFIER));
+                 $$ = maketree(FUNCCALLEXPR, 0);
+                 addChild($$, maketree(IDENTIFIER, 0));
                  $$->children[0]->strval = $1;
                  addChild($$, $3);  // argList
                  if (ST_lookup($1, "") == -1) {
@@ -428,10 +421,10 @@ funcCallExpr : ID LPAREN argList RPAREN
              }
              | ID LPAREN RPAREN
              {
-                 $$ = maketree(FUNCCALLEXPR);
-                 addChild($$, maketree(IDENTIFIER));
+                 $$ = maketree(FUNCCALLEXPR, 0);
+                 addChild($$, maketree(IDENTIFIER, 0));
                  $$->children[0]->strval = $1;
-                 addChild($$, maketree(ARGLIST));  // empty argList
+                 addChild($$, maketree(ARGLIST, 0));  // empty argList
                  if (ST_lookup($1, "") == -1) {
                      char error_msg[100];
                      snprintf(error_msg, sizeof(error_msg), "Undeclared function: %s", $1);
@@ -442,7 +435,7 @@ funcCallExpr : ID LPAREN argList RPAREN
 
 argList : expression
         {
-            $$ = maketree(ARGLIST);
+            $$ = maketree(ARGLIST, 0);
             addChild($$, $1);
         }
         | argList COMMA expression
@@ -454,24 +447,21 @@ argList : expression
 
 typeSpec : KWD_INT
          {
-             $$ = maketree(TYPESPEC);
-             $$->val = NODE_KWD_INT;  
+             $$ = maketree(TYPESPEC, KWD_INT);
          }
          | KWD_CHAR
          {
-             $$ = maketree(TYPESPEC);
-             $$->val = NODE_KWD_CHAR;  
+             $$ = maketree(TYPESPEC, KWD_CHAR);
          }
          | KWD_VOID
          {
-             $$ = maketree(TYPESPEC);
-             $$->val = KWD_VOID;
+             $$ = maketree(TYPESPEC, KWD_VOID);
          }
          ;
 
 loopStmt : KWD_WHILE LPAREN expression RPAREN statement
          {
-             $$ = maketree(LOOPSTMT);
+             $$ = maketree(LOOPSTMT, 0);
              addChild($$, $3);  // condition
              addChild($$, $5);  // loop body
          }
