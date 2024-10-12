@@ -23,10 +23,14 @@ const char* nodeTypeStrings[] = {
 
 tree *maketree(nodeKind kind) {
     tree *node = (tree *)malloc(sizeof(tree));
+    if (node == NULL) {
+        fprintf(stderr, "ERROR: Memory allocation failed for node\n");
+        exit(1);
+    }
     node->nodeKind = kind;
     node->numChildren = 0;
     node->parent = NULL;
-    // Initialize other fields as necessary
+    printf("DEBUG: Created node of type %s\n", nodeTypeStrings[kind]);
     return node;
 }
 
@@ -41,41 +45,53 @@ void addChild(tree *parent, tree *child) {
     }
 }
 
-void printAst(tree *root, int nestLevel) {
-    if (root == NULL) return;
-
-    // Print indentation
-    for (int i = 0; i < nestLevel; i++) {
-        printf("  ");
+void printAst(tree *t, int nestLevel) {
+    if (t == NULL) {
+        printf("DEBUG: Encountered NULL node at nest level %d\n", nestLevel);
+        return;
     }
-
-    // Print node information
-    printf("Node Type: %s\n", nodeTypeStrings[root->nodeKind]);
-
-    // Print additional node information based on node type
-    switch (root->nodeKind) {
+    
+    printf("DEBUG: Printing node of type %d at nest level %d\n", t->nodeKind, nestLevel);
+    fflush(stdout);
+    
+    // Print node-specific information
+    switch(t->nodeKind) {
         case IDENTIFIER:
-        case VAR:
-            printf("  Name: %s\n", root->strval);
-            break;
-        case INTEGER:
-            printf("  Value: %d\n", root->val);
-            break;
-        case CHAR:
-            printf("  Value: '%c'\n", root->val);
+            if (t->strval != NULL) {
+                printf("  Name: %s\n", t->strval);
+            } else {
+                printf("  WARNING: NULL identifier name\n");
+            }
             break;
         case TYPESPEC:
-            printf("  Type: %s\n", root->val == NODE_KWD_INT ? "int" : 
-                                   root->val == NODE_KWD_CHAR ? "char" : "void");
+            printf("  Type: %d\n", t->val);
             break;
-        // Add more cases for other node types as needed
+        // Add cases for other node types as needed
+        default:
+            printf("  Children: %d\n", t->numChildren);
     }
-
-    // Print number of children
-    printf("  Children: %d\n", root->numChildren);
-
-    // Recursively print children
-    for (int i = 0; i < root->numChildren; i++) {
-        printAst(root->children[i], nestLevel + 1);
+    
+    // Print children
+    for (int i = 0; i < t->numChildren; i++) {
+        if (t->children[i] != NULL) {
+            printf("DEBUG: About to print child %d of %d for node type %d\n", i+1, t->numChildren, t->nodeKind);
+            fflush(stdout);
+            printAst(t->children[i], nestLevel + 1);
+        } else {
+            printf("WARNING: Child %d of %d is NULL for node type %d\n", i+1, t->numChildren, t->nodeKind);
+        }
     }
+    
+    printf("DEBUG: Finished printing node of type %d at nest level %d\n", t->nodeKind, nestLevel);
+    fflush(stdout);
+}
+
+void freeAst(tree *t) {
+    if (t == NULL) return;
+    printf("DEBUG: Freeing node of type %d\n", t->nodeKind);
+    fflush(stdout);
+    for (int i = 0; i < t->numChildren; i++) {
+        freeAst(t->children[i]);
+    }
+    free(t);
 }

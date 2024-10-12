@@ -8,7 +8,8 @@
 
 extern int yylineno;
 
-int yylex(void);
+int get_token(void);
+#define yylex get_token
 int yyerror(char *s);
 
 
@@ -28,6 +29,17 @@ char* scope = "";
     struct treenode *node;
     char *strval;
 }
+
+%type <node> program declList decl varDecl funDecl typeSpec
+%type <node> formalDeclList formalDecl localDeclList
+%type <node> statementList statement compoundStmt
+%type <node> returnStmt expression
+%type <node> var
+%type <node> factor
+%type <node> assignStmt condStmt loopStmt
+%type <node> addExpr mulExpr relop addop mulop
+%type <node> funcCallExpr argList
+%type <node> integer
 
 %left OPER_ADD OPER_SUB
 %left OPER_MUL OPER_DIV
@@ -52,41 +64,33 @@ char* scope = "";
 
 /* TODO: Declate non-terminal symbols as of type node. Provided below is one example. node is defined as 'struct treenode *node' in the above union data structure. This declaration indicates to parser that these non-terminal variables will be implemented using a 'treenode *' type data structure. Hence, the circles you draw when drawing a parse tree, the following lines are telling yacc that these will eventually become circles in an AST. This is one of the connections between the AST you draw by hand and how yacc implements code to concretize that. We provide with two examples: program and declList from the grammar. Make sure to add the rest.  */
 
-%type <node> program declList decl varDecl funDecl typeSpec compoundStmt
-%type <node> formalDeclList formalDecl localDeclList
-%type <node> statementList statement assignStmt condStmt loopStmt returnStmt
-%type <node> expression addExpr mulExpr factor relop addop mulop
-%type <node> funcCallExpr argList var
-%type <node> integer
-
-
-
-
 %start program
 
 %%
 /* TODO: Your grammar and semantic actions go here. We provide with two example productions and their associated code for adding non-terminals to the AST.*/
 
-program         : declList
+program         : { printf("DEBUG: Entering program rule\n"); fflush(stdout); }
+                  declList
                  {
+                    printf("DEBUG: Reducing program\n");
                     tree* progNode = maketree(PROGRAM);
-                    addChild(progNode, $1);
+                    addChild(progNode, $2);  // Note: changed $1 to $2
                     ast = progNode;
+                    $$ = progNode;
                  }
                 ;
 
-declList        : decl
+declList        : { printf("DEBUG: Entering declList rule\n"); fflush(stdout); }
+                  decl
                  {
                     tree* declListNode = maketree(DECLLIST);
-                    addChild(declListNode, $1);
+                    addChild(declListNode, $2);  // Note: changed $1 to $2
                     $$ = declListNode;
                  }
                 | declList decl
                  {
-                    tree* declListNode = maketree(DECLLIST);
-                    addChild(declListNode, $1);
-                    addChild(declListNode, $2);
-                    $$ = declListNode;
+                    $$ = $1;
+                    addChild($$, $2);
                  }
                 ;
 
@@ -96,12 +100,14 @@ decl            : varDecl
 
 varDecl         : typeSpec ID SEMICLN
                 {
+                    printf("DEBUG: Reducing varDecl: %s\n", $2);
                     $$ = maketree(VARDECL);
                     addChild($$, $1);  // typeSpec
                     addChild($$, maketree(IDENTIFIER));
                     $$->children[1]->strval = $2;
-                    // TODO: Insert variable into symbol table
-                    // ST_insert($2, scope, ...);
+                    int dataType = $1->val;
+                    printf("DEBUG: Inserting variable %s with type %d\n", $2, dataType);
+                    ST_insert($2, scope, dataType, SCALAR);
                 }
                 | typeSpec ID LSQ_BRKT INTCONST RSQ_BRKT SEMICLN
                 {
@@ -111,8 +117,8 @@ varDecl         : typeSpec ID SEMICLN
                     $$->children[1]->strval = $2;
                     addChild($$->children[1], maketree(INTEGER));
                     $$->children[1]->children[0]->val = $4;  // array size
-                    // TODO: Insert array into symbol table
-                    // ST_insert($2, scope, ...);
+                    int dataType = $1->val;  // Assuming typeSpec sets this value
+                    ST_insert($2, scope, dataType, ARRAY);
                 }
                 ;
 
@@ -233,11 +239,18 @@ assignStmt : var OPER_ASGN expression SEMICLN
 
 var : ID
     {
+        printf("DEBUG: Processing var: %s\n", $1);
         $$ = maketree(VAR);
         addChild($$, maketree(IDENTIFIER));
         $$->children[0]->strval = $1;
-        // TODO: Check if variable is in symbol table
-        // if (!ST_lookup($1, scope)) yyerror("Undeclared variable");
+        if (ST_lookup($1, scope) == -1) {
+            printf("DEBUG: Variable %s not found in symbol table\n", $1);
+            char error_msg[100];
+            snprintf(error_msg, sizeof(error_msg), "Undeclared variable: %s", $1);
+            yyerror(error_msg);
+        } else {
+            printf("DEBUG: Variable %s found in symbol table\n", $1);
+        }
     }
     | ID LSQ_BRKT expression RSQ_BRKT
     {
@@ -245,12 +258,19 @@ var : ID
         addChild($$, maketree(ARRAYDECL));
         $$->children[0]->strval = $1;
         addChild($$->children[0], $3);  // array index expression
-        // TODO: Check if array is in symbol table
-        // if (!ST_lookup($1, scope)) yyerror("Undeclared array");
+        if (ST_lookup($1, scope) == -1) {
+            char error_msg[100];
+            snprintf(error_msg, sizeof(error_msg), "Undeclared array: %s", $1);
+            yyerror(error_msg);
+        }
     }
     ;
 
 expression : addExpr
+           {
+               printf("DEBUG: Reducing expression\n");
+               $$ = $1;
+           }
            | expression relop addExpr
            {
                $$ = maketree(EXPRESSION);
@@ -321,8 +341,13 @@ relop : OPER_LT
       ;
 
 addExpr : mulExpr
+        {
+            printf("DEBUG: Reducing addExpr (mulExpr)\n");
+            $$ = $1;
+        }
         | addExpr addop mulExpr
         {
+            printf("DEBUG: Reducing addExpr (addExpr addop mulExpr)\n");
             $$ = maketree(ADDEXPR);
             addChild($$, $1);
             addChild($$, $2);
@@ -343,6 +368,10 @@ addop : OPER_ADD
       ;
 
 mulExpr : factor
+        {
+            $$ = maketree(TERM);
+            addChild($$, $1);
+        }
         | mulExpr mulop factor
         {
             $$ = maketree(TERM);
@@ -364,24 +393,28 @@ mulop : OPER_MUL
       }
       ;
 
-factor : LPAREN expression RPAREN
+factor : var
        {
-           $$ = $2;  
+           $$ = $1;
        }
-       | var
-       | funcCallExpr
        | integer
-       | CHARCONST
        {
-           $$ = maketree(CHAR);
-           $$->val = $1;
+           $$ = $1;  // This is correct now, as integer is of type <node>
+       }
+       | LPAREN expression RPAREN
+       {
+           $$ = $2;
+       }
+       | funcCallExpr
+       {
+           $$ = $1;
        }
        ;
 
 integer : INTCONST
         {
             $$ = maketree(INTEGER);
-            $$->val = $1;
+            $$->val = $1;  // This is correct, as $1 is of type <value>
         }
         ;
 

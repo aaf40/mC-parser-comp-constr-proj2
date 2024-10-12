@@ -25,6 +25,8 @@ struct strEntry{
     int   symbol_type;
 };
 
+/* initialize the symbol table */
+void ST_init();
 
 /* The symbolTable, which will be implemented as a hash table. */
 extern struct strEntry strTable[MAXIDS];

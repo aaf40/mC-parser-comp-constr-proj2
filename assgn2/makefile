@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -I./src -std=gnu99
+CFLAGS = -I./src -std=gnu99 -g
 
 LEX=flex
 

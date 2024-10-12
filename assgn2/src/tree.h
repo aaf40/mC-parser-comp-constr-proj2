@@ -35,4 +35,7 @@ void addChild(tree *parent, tree *child);
 /* prints the ast recursively starting from the root of the ast. */
 void printAst(tree *root, int nestLevel);
 
+/* frees the ast recursively starting from the root of the ast. */
+void freeAst(tree *t);
+
 #endif
