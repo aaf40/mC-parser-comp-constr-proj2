@@ -402,19 +402,23 @@ mulop : OPER_MUL
 
 factor : var
        {
-           $$ = $1;
+           $$ = maketree(FACTOR, 0);
+           addChild($$, $1);
        }
        | integer
        {
-           $$ = $1;  // This is correct now, as integer is of type <node>
+           $$ = maketree(FACTOR, 0);
+           addChild($$, $1);
        }
        | LPAREN expression RPAREN
        {
-           $$ = $2;
+           $$ = maketree(FACTOR, 0);
+           addChild($$, $2);
        }
        | funcCallExpr
        {
-           $$ = $1;
+           $$ = maketree(FACTOR, 0);
+           addChild($$, $1);
        }
        ;
 
