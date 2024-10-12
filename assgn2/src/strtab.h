@@ -43,6 +43,7 @@ void output_entry(int i);
 
 unsigned long hash(unsigned char *str);
 
+/* frees the symbol table. */
 void ST_free();
 
 #endif

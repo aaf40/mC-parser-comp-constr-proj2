@@ -11,7 +11,7 @@ extern int yylineno;
 int get_token(void);
 #define yylex get_token
 int yyerror(char *s);
-
+int yywarning(char *s);
 
 
 
@@ -133,8 +133,7 @@ funDecl : typeSpec ID LPAREN formalDeclList RPAREN compoundStmt
             
             // Update scope for symbol table
             scope = $2;
-            // TODO: Insert function into symbol table
-            // ST_insert($2, "", FUNCTION, ...);
+            ST_insert($2, "", $1->val, FUNCTION);
             
             scope = "";  // Reset to global scope after function
         }
@@ -149,8 +148,7 @@ funDecl : typeSpec ID LPAREN formalDeclList RPAREN compoundStmt
             
             // Update scope for symbol table
             scope = $2;
-            // TODO: Insert function into symbol table
-            // ST_insert($2, "", FUNCTION, ...);
+            ST_insert($2, "", $1->val, FUNCTION);
             
             scope = "";  // Reset to global scope after function
         }
@@ -174,8 +172,7 @@ formalDecl : typeSpec ID
                addChild($$, $1);
                addChild($$, maketree(IDENTIFIER));
                $$->children[1]->strval = $2;
-               // TODO: Insert parameter into symbol table
-               // ST_insert($2, scope, ...);
+               ST_insert($2, scope, $1->val, SCALAR);
            }
            | typeSpec ID LSQ_BRKT RSQ_BRKT
            {
@@ -183,8 +180,7 @@ formalDecl : typeSpec ID
                addChild($$, $1);
                addChild($$, maketree(ARRAYDECL));
                $$->children[1]->strval = $2;
-               // TODO: Insert array parameter into symbol table
-               // ST_insert($2, scope, ...);
+               ST_insert($2, scope, $1->val, ARRAY);
            }
            ;
 
@@ -424,8 +420,11 @@ funcCallExpr : ID LPAREN argList RPAREN
                  addChild($$, maketree(IDENTIFIER));
                  $$->children[0]->strval = $1;
                  addChild($$, $3);  // argList
-                 // TODO: Check if function is in symbol table
-                 // if (!ST_lookup($1, "")) yyerror("Undeclared function");
+                 if (ST_lookup($1, "") == -1) {
+                     char error_msg[100];
+                     snprintf(error_msg, sizeof(error_msg), "Undeclared function: %s", $1);
+                     yywarning(error_msg);
+                 }
              }
              | ID LPAREN RPAREN
              {
@@ -433,8 +432,11 @@ funcCallExpr : ID LPAREN argList RPAREN
                  addChild($$, maketree(IDENTIFIER));
                  $$->children[0]->strval = $1;
                  addChild($$, maketree(ARGLIST));  // empty argList
-                 // TODO: Check if function is in symbol table
-                 // if (!ST_lookup($1, "")) yyerror("Undeclared function");
+                 if (ST_lookup($1, "") == -1) {
+                     char error_msg[100];
+                     snprintf(error_msg, sizeof(error_msg), "Undeclared function: %s", $1);
+                     yywarning(error_msg);
+                 }
              }
              ;
 
