@@ -46,7 +46,7 @@ test: obj/mcc
 fulltest: obj/mcc
 	@for file in test/*.mC; do \
 		echo "Testing $$file:"; \
-		./obj/mcc $$file < /dev/null > "$$file.out" 2>&1 || echo "Error occurred"; \
+		./obj/mcc < "$$file" > "$$file.out" 2>&1 || echo "Error occurred"; \
 		cat "$$file.out"; \
 		echo "Exit status: $$?"; \
 		echo ""; \

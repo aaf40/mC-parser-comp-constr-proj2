@@ -122,7 +122,9 @@ void printAst(tree *t, int level) {
             printf("DeclList\n");
             break;
         case FUNDECL:
-            printf("FunDecl\n");
+            printf("decl\n");
+            printIndent(level + 1);
+            printf("funDecl\n");
             break;
         case TYPESPEC:
             printf("TypeSpec: ");
@@ -217,6 +219,12 @@ void printAst(tree *t, int level) {
             break;
         case CHAR:
             printf("Char: %c\n", (char)t->val);
+            break;
+        case FUNCTYPENAME:
+            printf("funcTypeName\n");
+            break;
+        case FUNBODY:
+            printf("funBody\n");
             break;
         default:
             printf("Unknown node type: %s (%d)\n", nodeTypeStrings[t->nodeKind], t->nodeKind);

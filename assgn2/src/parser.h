@@ -14,5 +14,4 @@ typedef enum nodeKind {
     NODE_KWD_INT, NODE_KWD_CHAR
 } nodeKind;
 
-
 #endif // PARSER_H

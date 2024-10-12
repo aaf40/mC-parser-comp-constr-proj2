@@ -125,11 +125,15 @@ varDecl         : typeSpec ID SEMICLN
 funDecl : typeSpec ID LPAREN formalDeclList RPAREN compoundStmt
         {
             $$ = maketree(FUNDECL, 0);
-            addChild($$, $1);  // typeSpec
-            addChild($$, maketree(IDENTIFIER, 0));
-            $$->children[1]->strval = $2;  // ID
+            tree *funcTypeName = maketree(FUNCTYPENAME, 0);
+            addChild(funcTypeName, $1);  // typeSpec
+            addChild(funcTypeName, maketree(IDENTIFIER, 0));
+            funcTypeName->children[1]->strval = $2;  // ID
+            addChild($$, funcTypeName);
             addChild($$, $4);  // formalDeclList
-            addChild($$, $6);  // compoundStmt
+            tree *funBody = maketree(FUNBODY, 0);
+            addChild(funBody, $6);  // compoundStmt
+            addChild($$, funBody);
             
             // Update scope for symbol table
             scope = $2;
@@ -140,11 +144,15 @@ funDecl : typeSpec ID LPAREN formalDeclList RPAREN compoundStmt
         | typeSpec ID LPAREN RPAREN compoundStmt
         {
             $$ = maketree(FUNDECL, 0);
-            addChild($$, $1);  // typeSpec
-            addChild($$, maketree(IDENTIFIER, 0));
-            $$->children[1]->strval = $2;  // ID
+            tree *funcTypeName = maketree(FUNCTYPENAME, 0);
+            addChild(funcTypeName, $1);  // typeSpec
+            addChild(funcTypeName, maketree(IDENTIFIER, 0));
+            funcTypeName->children[1]->strval = $2;  // ID
+            addChild($$, funcTypeName);
             addChild($$, maketree(FORMALDECLLIST, 0));  // empty formal decl list
-            addChild($$, $5);  // compoundStmt
+            tree *funBody = maketree(FUNBODY, 0);
+            addChild(funBody, $5);  // compoundStmt
+            addChild($$, funBody);
             
             // Update scope for symbol table
             scope = $2;
