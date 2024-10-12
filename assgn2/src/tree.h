@@ -10,6 +10,8 @@ struct treenode {
       int nodeKind;
       int numChildren;
       int val;
+      char *strval;
+      int opType;
       tree *parent;
       tree *children[MAXCHILDREN];
 };

@@ -78,7 +78,10 @@ yylineno = 1;
  /* Constants */;
 {integer}       {updateCol(); yylval.value = atoi(yytext); return INTCONST;}
 {integerlead0}  {updateCol(); yyerrormsg = "Integers may not have leading zeros"; return ERROR;}
-{character}     {updateCol(); return CHARCONST;}
+{character}     {updateCol(); 
+                 yylval.value = yytext[1]; 
+                 return CHARCONST;
+                 }
 
  /* Comments */;
 {comment}       {updateCol(); /* skip comments */}
