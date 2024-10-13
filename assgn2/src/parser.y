@@ -51,20 +51,19 @@ char* scope = "";
 
 %%
 
+
 program         : declList
                 {
-                    tree* progNode = maketree(PROGRAM, 0);
-                    addChild(progNode, $1);
-                    ast = progNode;
-                    $$ = progNode;
+                    $$ = maketree(PROGRAM, 0);
+                    addChild($$, $1);
+                    ast = $$;
                 }
                 ;
 
 declList        : decl
                 {
-                    tree* declListNode = maketree(DECLLIST, 0);
-                    addChild(declListNode, $1);
-                    $$ = declListNode;
+                    $$ = maketree(DECLLIST, 0);
+                    addChild($$, $1);
                 }
                 | declList decl
                 {
@@ -74,15 +73,7 @@ declList        : decl
                 ;
 
 decl            : varDecl
-                {
-                    $$ = maketree(DECL, 0);
-                    addChild($$, $1);
-                }
                 | funDecl
-                {
-                    $$ = maketree(DECL, 0);
-                    addChild($$, $1);
-                }
                 ;
 
 varDecl         : typeSpecifier ID SEMICLN
@@ -135,9 +126,11 @@ funDecl         : typeSpecifier ID LPAREN formalDeclList RPAREN funBody
                 | typeSpecifier ID LPAREN RPAREN funBody
                 {
                     $$ = maketree(FUNDECL, 0);
-                    addChild($$, $1);
-                    addChild($$, maketree(IDENTIFIER, 0));
-                    $$->children[1]->strval = $2;
+                    tree *funcTypeName = maketree(FUNCTYPENAME, 0);
+                    addChild(funcTypeName, $1);
+                    addChild(funcTypeName, maketree(IDENTIFIER, 0));
+                    funcTypeName->children[1]->strval = $2;
+                    addChild($$, funcTypeName);
                     addChild($$, maketree(FORMALDECLLIST, 0));
                     addChild($$, $5);
                     scope = $2;
@@ -185,7 +178,7 @@ funBody         : LCRLY_BRKT localDeclList statementList RCRLY_BRKT
                 }
                 ;
 
-localDeclList   : 
+localDeclList   :
                 {
                     $$ = maketree(LOCALDECLLIST, 0);
                 }
@@ -197,30 +190,23 @@ localDeclList   :
                 }
                 ;
 
-statementList   : statement
+statementList   :
+                {
+                    $$ = maketree(STATEMENTLIST, 0);
+                }
+                | statement statementList
                 {
                     $$ = maketree(STATEMENTLIST, 0);
                     addChild($$, $1);
-                }
-                | statementList statement
-                {
-                    $$ = $1;
                     addChild($$, $2);
                 }
                 ;
 
-statement       : assignStmt
-                | compoundStmt
+statement       : compoundStmt
+                | assignStmt
                 | condStmt
                 | loopStmt
                 | returnStmt
-                | expression SEMICLN
-                {
-                    $$ = maketree(STATEMENT, 0);
-                    tree *exprStmt = maketree(EXPRSTMT, 0);
-                    addChild(exprStmt, $1);
-                    addChild($$, exprStmt);
-                }
                 ;
 
 compoundStmt    : LCRLY_BRKT statementList RCRLY_BRKT
@@ -234,9 +220,12 @@ assignStmt      : var OPER_ASGN expression SEMICLN
                 {
                     $$ = maketree(ASSIGNSTMT, 0);
                     addChild($$, $1);
-                    tree *expr = maketree(EXPRESSION, 0);
-                    addChild(expr, $3);
-                    addChild($$, expr);
+                    addChild($$, $3);
+                }
+                | expression SEMICLN
+                {
+                    $$ = maketree(ASSIGNSTMT, 0);
+                    addChild($$, $1);
                 }
                 ;
 
@@ -335,17 +324,13 @@ relop           : OPER_LTE
                 }
                 ;
 
-addExpr         : addExpr addop term
+addExpr         : term
+                | addExpr addop term
                 {
                     $$ = maketree(ADDEXPR, 0);
                     addChild($$, $1);
                     addChild($$, $2);
                     addChild($$, $3);
-                }
-                | term
-                {
-                    $$ = maketree(ADDEXPR, 0);
-                    addChild($$, $1);
                 }
                 ;
 
@@ -359,17 +344,13 @@ addop           : OPER_ADD
                 }
                 ;
 
-term            : term mulop factor
+term            : factor
+                | term mulop factor
                 {
                     $$ = maketree(TERM, 0);
                     addChild($$, $1);
                     addChild($$, $2);
                     addChild($$, $3);
-                }
-                | factor
-                {
-                    $$ = maketree(TERM, 0);
-                    addChild($$, $1);
                 }
                 ;
 
@@ -456,6 +437,7 @@ argList         : expression
                 ;
 
 %%
+
 
 int yywarning(char * msg){
     printf("warning: line %d: %s\n", yylineno, msg);
