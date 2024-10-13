@@ -10,13 +10,13 @@ tree *ast = NULL;
 
 // Node type strings
 const char* nodeTypeStrings[] = {
-    "PROGRAM", "DECLLIST", "DECL", "VARDECL", "TYPESPEC", "FUNDECL",
-    "FORMALDECLLIST", "FORMALDECL", "FUNBODY", "LOCALDECLLIST",
-    "STATEMENTLIST", "STATEMENT", "COMPOUNDSTMT", "ASSIGNSTMT",
-    "CONDSTMT", "LOOPSTMT", "RETURNSTMT", "EXPRESSION", "RELOP",
-    "ADDEXPR", "ADDOP", "TERM", "MULOP", "FACTOR", "FUNCCALLEXPR",
-    "ARGLIST", "INTEGER", "IDENTIFIER", "VAR", "ARRAYDECL", "CHAR",
-    "FUNCTYPENAME", "NODE_KWD_INT", "NODE_KWD_CHAR", "STRING"
+    "program", "decList", "decl", "varDecl", "typeSpecifier", "funDecl",
+    "formalDeclList", "formalDecl", "funBody", "localDeclList",
+    "statementList", "statement", "compoundStmt", "assignStmt",
+    "condStmt", "loopStmt", "returnStmt", "expression", "relop",
+    "addExpr", "addop", "term", "mulop", "factor", "funcCallExpr",
+    "argList", "integer", "identifier", "var", "arrayDecl", "char",
+    "funcTypeName", "string"
 };
 
 tree *maketree(nodeKind kind, int value) {
@@ -123,64 +123,24 @@ void printAst(tree *t, int level) {
     printIndent(level);
     
     switch(t->nodeKind) {
-        case PROGRAM:
-            printf("program\n");
-            break;
-        case DECLLIST:
-            printf("declList\n");
-            break;
-        case DECL:
-            printf("decl\n");
-            break;
-        case FUNDECL:
-            printf("funDecl\n");
-            break;
-        case FUNCTYPENAME:
-            printf("funcTypeName\n");
-            break;
         case TYPESPEC:
-            printf("typeSpecifier,%s\n", t->val == KWD_INT ? "int" : (t->val == KWD_CHAR ? "char" : "void"));
+            printf("%s,%s\n", nodeTypeStrings[t->nodeKind], 
+                   t->val == KWD_INT ? "int" : (t->val == KWD_CHAR ? "char" : "void"));
             break;
         case IDENTIFIER:
-            printf("identifier,%s\n", t->strval);
-            break;
-        case FUNBODY:
-            printf("funBody\n");
-            break;
-        case STATEMENTLIST:
-            printf("statementList\n");
-            break;
-        case STATEMENT:
-            printf("statement\n");
-            break;
-        case ASSIGNSTMT:
-            printf("assignStmt\n");
-            break;
-        case EXPRESSION:
-            printf("expression\n");
-            break;
-        case ADDEXPR:
-            printf("addExpr\n");
-            break;
-        case TERM:
-            printf("term\n");
-            break;
-        case FACTOR:
-            printf("factor\n");
+            printf("%s,%s\n", nodeTypeStrings[t->nodeKind], t->strval);
             break;
         case INTEGER:
-            printf("integer,%d\n", t->val);
+            printf("%s,%d\n", nodeTypeStrings[t->nodeKind], t->val);
             break;
         case ADDOP:
-            printf("addop,%c\n", t->val == OPER_ADD ? '+' : '-');
+            printf("%s,%c\n", nodeTypeStrings[t->nodeKind], t->val == OPER_ADD ? '+' : '-');
             break;
         default:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
     }
     
     for (int i = 0; i < t->numChildren; i++) {
-        if (t->children[i]->nodeKind != FORMALDECLLIST && t->children[i]->nodeKind != LOCALDECLLIST) {
-            printAst(t->children[i], level + 1);
-        }
+        printAst(t->children[i], level + 1);
     }
 }

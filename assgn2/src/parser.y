@@ -74,7 +74,15 @@ declList        : decl
                 ;
 
 decl            : varDecl
+                {
+                    $$ = maketree(DECL, 0);
+                    addChild($$, $1);
+                }
                 | funDecl
+                {
+                    $$ = maketree(DECL, 0);
+                    addChild($$, $1);
+                }
                 ;
 
 varDecl         : typeSpecifier ID SEMICLN
@@ -113,9 +121,11 @@ typeSpecifier   : KWD_INT
 funDecl         : typeSpecifier ID LPAREN formalDeclList RPAREN funBody
                 {
                     $$ = maketree(FUNDECL, 0);
-                    addChild($$, $1);
-                    addChild($$, maketree(IDENTIFIER, 0));
-                    $$->children[1]->strval = $2;
+                    tree *funcTypeName = maketree(FUNCTYPENAME, 0);
+                    addChild(funcTypeName, $1);
+                    addChild(funcTypeName, maketree(IDENTIFIER, 0));
+                    funcTypeName->children[1]->strval = $2;
+                    addChild($$, funcTypeName);
                     addChild($$, $4);
                     addChild($$, $6);
                     scope = $2;
@@ -175,7 +185,7 @@ funBody         : LCRLY_BRKT localDeclList statementList RCRLY_BRKT
                 }
                 ;
 
-localDeclList   : /* empty */
+localDeclList   : 
                 {
                     $$ = maketree(LOCALDECLLIST, 0);
                 }
@@ -187,23 +197,30 @@ localDeclList   : /* empty */
                 }
                 ;
 
-statementList   : /* empty */
-                {
-                    $$ = maketree(STATEMENTLIST, 0);
-                }
-                | statement statementList
+statementList   : statement
                 {
                     $$ = maketree(STATEMENTLIST, 0);
                     addChild($$, $1);
+                }
+                | statementList statement
+                {
+                    $$ = $1;
                     addChild($$, $2);
                 }
                 ;
 
-statement       : compoundStmt
-                | assignStmt
+statement       : assignStmt
+                | compoundStmt
                 | condStmt
                 | loopStmt
                 | returnStmt
+                | expression SEMICLN
+                {
+                    $$ = maketree(STATEMENT, 0);
+                    tree *exprStmt = maketree(EXPRSTMT, 0);
+                    addChild(exprStmt, $1);
+                    addChild($$, exprStmt);
+                }
                 ;
 
 compoundStmt    : LCRLY_BRKT statementList RCRLY_BRKT
@@ -217,12 +234,9 @@ assignStmt      : var OPER_ASGN expression SEMICLN
                 {
                     $$ = maketree(ASSIGNSTMT, 0);
                     addChild($$, $1);
-                    addChild($$, $3);
-                }
-                | expression SEMICLN
-                {
-                    $$ = maketree(ASSIGNSTMT, 0);
-                    addChild($$, $1);
+                    tree *expr = maketree(EXPRESSION, 0);
+                    addChild(expr, $3);
+                    addChild($$, expr);
                 }
                 ;
 
@@ -321,13 +335,17 @@ relop           : OPER_LTE
                 }
                 ;
 
-addExpr         : term
-                | addExpr addop term
+addExpr         : addExpr addop term
                 {
                     $$ = maketree(ADDEXPR, 0);
                     addChild($$, $1);
                     addChild($$, $2);
                     addChild($$, $3);
+                }
+                | term
+                {
+                    $$ = maketree(ADDEXPR, 0);
+                    addChild($$, $1);
                 }
                 ;
 
@@ -341,13 +359,17 @@ addop           : OPER_ADD
                 }
                 ;
 
-term            : factor
-                | term mulop factor
+term            : term mulop factor
                 {
                     $$ = maketree(TERM, 0);
                     addChild($$, $1);
                     addChild($$, $2);
                     addChild($$, $3);
+                }
+                | factor
+                {
+                    $$ = maketree(TERM, 0);
+                    addChild($$, $1);
                 }
                 ;
 
@@ -363,22 +385,35 @@ mulop           : OPER_MUL
 
 factor          : LPAREN expression RPAREN
                 {
-                    $$ = $2;
+                    $$ = maketree(FACTOR, 0);
+                    addChild($$, $2);
                 }
                 | var
+                {
+                    $$ = maketree(FACTOR, 0);
+                    addChild($$, $1);
+                }
                 | funcCallExpr
+                {
+                    $$ = maketree(FACTOR, 0);
+                    addChild($$, $1);
+                }
                 | INTCONST
                 {
-                    $$ = maketree(INTEGER, $1);
+                    $$ = maketree(FACTOR, 0);
+                    addChild($$, maketree(INTEGER, $1));
                 }
                 | CHARCONST
                 {
-                    $$ = maketree(CHAR, $1);
+                    $$ = maketree(FACTOR, 0);
+                    addChild($$, maketree(CHAR, $1));
                 }
                 | STRCONST
                 {
-                    $$ = maketree(STRING, 0);
-                    $$->strval = $1;
+                    $$ = maketree(FACTOR, 0);
+                    tree *strNode = maketree(STRING, 0);
+                    strNode->strval = $1;
+                    addChild($$, strNode);
                 }
                 ;
 
