@@ -24,7 +24,7 @@ struct treenode {
 extern tree *ast; /* pointer to AST root */
 
 /* builds sub tree with zero children  */
-tree *maketree(nodeKind kind);
+tree *maketree(nodeKind kind, int value);
 
 /* builds sub tree with leaf node. Leaf nodes typically hold a value. */
 tree *maketreeWithVal(nodeKind kind, int val);
@@ -32,7 +32,17 @@ tree *maketreeWithVal(nodeKind kind, int val);
 /* assigns the subtree rooted at 'child' as a child of the subtree rooted at 'parent'. Also assigns the 'parent' node as the 'child->parent'. */
 void addChild(tree *parent, tree *child);
 
+/* prints the ast recursively starting from the root of the ast with debug statements. */
+void printAstDebug(tree *root, int nestLevel);
+
+/* frees the ast recursively starting from the root of the ast. */
+void freeAst(tree *t);
+
+/* prints the indent for the ast recursively starting from the root of the ast. */
+void printIndent(int level);
+
 /* prints the ast recursively starting from the root of the ast. */
 void printAst(tree *root, int nestLevel);
+
 
 #endif

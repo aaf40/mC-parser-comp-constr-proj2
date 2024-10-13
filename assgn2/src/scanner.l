@@ -1,9 +1,8 @@
-
 /* definitions */
 
 %{
-#include<stdio.h>
-#include"../obj/y.tab.h"
+#include <stdio.h>
+#include "y.tab.h"
 #include <stdio.h>
 #include "y.tab.h"
 #include "parser.h"
@@ -15,6 +14,7 @@ int scanlineno = 1;
 char* yyerrormsg;
 void updateCol();
 void countLines();
+int get_token(void);
 %}
 
 newline         \n
@@ -108,4 +108,12 @@ void countLines(){
         if (yytext[i] == '\n')
             scanlineno++;
     }
+}
+
+#undef yylex
+int get_token(void) {
+    int token = yylex();
+    /*printf("DEBUG: Scanned token: %d (%s)\n", token, yytext);*/
+    fflush(stdout);
+    return token;
 }

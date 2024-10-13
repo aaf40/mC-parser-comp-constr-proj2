@@ -1,6 +1,8 @@
 #ifndef STRTAB_H
 #define STRTAB_H
 #define MAXIDS 1000
+#define MAX_ID_LENGTH 50
+#define MAX_SCOPE_LENGTH 100
 
 /* These enums are used in the parser.y file when creating nodes in the AST corresponding to the 'typeSpecifier' tokens . */
 enum dataType {INT_TYPE, CHAR_TYPE, VOID_TYPE};
@@ -23,6 +25,8 @@ struct strEntry{
     int   symbol_type;
 };
 
+/* initialize the symbol table */
+void ST_init();
 
 /* The symbolTable, which will be implemented as a hash table. */
 extern struct strEntry strTable[MAXIDS];
@@ -36,5 +40,10 @@ int ST_lookup(char *id, char *scope);
 
 /* Print the i-th symbol table entry. You may not need this function. */
 void output_entry(int i);
+
+unsigned long hash(unsigned char *str);
+
+/* frees the symbol table. */
+void ST_free();
 
 #endif

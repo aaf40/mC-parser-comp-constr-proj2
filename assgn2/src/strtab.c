@@ -3,10 +3,6 @@
 #include <string.h>
 #include "strtab.h"
 
-#define MAXIDS 1000
-#define MAX_ID_LENGTH 50
-#define MAX_SCOPE_LENGTH 100
-
 struct strEntry strTable[MAXIDS];
 
 const char* dataTypeStrings[] = {"int", "char", "void"};
@@ -34,6 +30,7 @@ void ST_init() {
 }
 
 int ST_insert(char *id, char *scope, int data_type, int symbol_type) {
+    /*printf("DEBUG: Inserting %s in scope %s with type %d and symbol type %d\n", id, scope, data_type, symbol_type);*/
     char key[MAX_ID_LENGTH + MAX_SCOPE_LENGTH];
     snprintf(key, sizeof(key), "%s_%s", scope, id);
     
@@ -72,6 +69,7 @@ int ST_insert(char *id, char *scope, int data_type, int symbol_type) {
 }
 
 int ST_lookup(char *id, char *scope) {
+    /*printf("DEBUG: Looking up %s in scope %s\n", id, scope);*/
     char key[MAX_ID_LENGTH + MAX_SCOPE_LENGTH];
     snprintf(key, sizeof(key), "%s_%s", scope, id);
     
@@ -102,8 +100,12 @@ void output_entry(int i) {
 }
 
 void ST_free() {
+    printf("DEBUG: Starting to free symbol table\n");
+    fflush(stdout);
     for (int i = 0; i < MAXIDS; i++) {
         free(strTable[i].id);
         free(strTable[i].scope);
     }
+    printf("DEBUG: Symbol table freed\n");
+    fflush(stdout);
 }
