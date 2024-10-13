@@ -119,7 +119,7 @@ void printIndent(int level) {
 
 void printAst(tree *t, int level) {
     if (t == NULL) return;
-
+    
     printIndent(level);
     
     switch(t->nodeKind) {
@@ -129,6 +129,9 @@ void printAst(tree *t, int level) {
         case DECLLIST:
             printf("declList\n");
             break;
+        case DECL:
+            printf("decl\n");
+            break;
         case FUNDECL:
             printf("funDecl\n");
             break;
@@ -136,34 +139,22 @@ void printAst(tree *t, int level) {
             printf("funcTypeName\n");
             break;
         case TYPESPEC:
-            printf("typeSpecifier, ");
-            switch(t->val) {
-                case KWD_INT: printf("int\n"); break;
-                case KWD_CHAR: printf("char\n"); break;
-                case KWD_VOID: printf("void\n"); break;
-                default: printf("unknown (%d)\n", t->val);
-            }
+            printf("typeSpecifier,%s\n", t->val == KWD_INT ? "int" : (t->val == KWD_CHAR ? "char" : "void"));
             break;
         case IDENTIFIER:
-            printf("identifier, %s\n", t->strval);
+            printf("identifier,%s\n", t->strval);
             break;
-        case VARDECL:
-            printf("varDecl\n");
-            break;
-        case FORMALDECLLIST:
-            printf("formalDeclList\n");
-            break;
-        case FORMALDECL:
-            printf("formalDecl\n");
-            break;
-        case LOCALDECLLIST:
-            printf("localDeclList\n");
+        case FUNBODY:
+            printf("funBody\n");
             break;
         case STATEMENTLIST:
             printf("statementList\n");
             break;
-        case COMPOUNDSTMT:
-            /*printf("compoundStmt\n");*/
+        case STATEMENT:
+            printf("statement\n");
+            break;
+        case ASSIGNSTMT:
+            printf("assignStmt\n");
             break;
         case EXPRESSION:
             printf("expression\n");
@@ -178,62 +169,18 @@ void printAst(tree *t, int level) {
             printf("factor\n");
             break;
         case INTEGER:
-            printf("integer, %d\n", t->val);
-            break;
-        case VAR:
-            printf("var\n");
-            break;
-        case STATEMENT:
-            printf("statement\n");
-            break;
-        case CONDSTMT:
-            printf("condStmt\n");
-            break;
-        case LOOPSTMT:
-            printf("loopStmt\n");
-            break;
-        case RETURNSTMT:
-            printf("returnStmt\n");
-            break;
-        case ASSIGNSTMT:
-            printf("assignStmt\n");
+            printf("integer,%d\n", t->val);
             break;
         case ADDOP:
-            printf("addop, ");
-            switch(t->val) {
-                case OPER_ADD: printf("+\n"); break;
-                case OPER_SUB: printf("-\n"); break;
-                default: printf("unknown (%d)\n", t->val);
-            }
-            break;
-        case MULOP:
-            printf("mulop, ");
-            switch(t->val) {
-                case OPER_MUL: printf("*\n"); break;
-                case OPER_DIV: printf("/\n"); break;
-                default: printf("unknown (%d)\n", t->val);
-            }
-            break;
-        case RELOP:
-            printf("relop, ");
-            switch(t->val) {
-                case OPER_LT: printf("<\n"); break;
-                case OPER_LTE: printf("<=\n"); break;
-                case OPER_GT: printf(">\n"); break;
-                case OPER_GTE: printf(">=\n"); break;
-                case OPER_EQ: printf("==\n"); break;
-                case OPER_NEQ: printf("!=\n"); break;
-                default: printf("unknown (%d)\n", t->val);
-            }
-            break;
-        case CHAR:
-            printf("char, %c\n", (char)t->val);
+            printf("addop,%c\n", t->val == OPER_ADD ? '+' : '-');
             break;
         default:
-            printf("unknown node type, %s (%d)\n", nodeTypeStrings[t->nodeKind], t->nodeKind);
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
     }
-
+    
     for (int i = 0; i < t->numChildren; i++) {
-        printAst(t->children[i], level + 1);
+        if (t->children[i]->nodeKind != FORMALDECLLIST && t->children[i]->nodeKind != LOCALDECLLIST) {
+            printAst(t->children[i], level + 1);
+        }
     }
 }
