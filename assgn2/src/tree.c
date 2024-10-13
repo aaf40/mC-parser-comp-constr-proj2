@@ -123,6 +123,42 @@ void printAst(tree *t, int level) {
     printIndent(level);
     
     switch(t->nodeKind) {
+        case PROGRAM:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            printAst(t->children[0], level + 1);  // Print declList
+            break;
+        case DECLLIST:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printIndent(level + 1);
+                printf("decl\n");
+                printAst(t->children[i], level + 2);
+            }
+            break;
+        case FUNDECL:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                if (t->children[i]->nodeKind != FORMALDECLLIST) {
+                    printAst(t->children[i], level + 1);
+                }
+            }
+            break;
+        case FUNBODY:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                if (t->children[i]->nodeKind != LOCALDECLLIST) {
+                    printAst(t->children[i], level + 1);
+                }
+            }
+            break;
+        case STATEMENTLIST:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printIndent(level + 1);
+                printf("statement\n");
+                printAst(t->children[i], level + 2);
+            }
+            break;
         case TYPESPEC:
             printf("%s,%s\n", nodeTypeStrings[t->nodeKind], 
                    t->val == KWD_INT ? "int" : (t->val == KWD_CHAR ? "char" : "void"));
@@ -136,11 +172,13 @@ void printAst(tree *t, int level) {
         case ADDOP:
             printf("%s,%c\n", nodeTypeStrings[t->nodeKind], t->val == OPER_ADD ? '+' : '-');
             break;
+        case MULOP:
+            printf("%s,%c\n", nodeTypeStrings[t->nodeKind], t->val == OPER_MUL ? '*' : '/');
+            break;
         default:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
-    }
-    
-    for (int i = 0; i < t->numChildren; i++) {
-        printAst(t->children[i], level + 1);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
     }
 }
