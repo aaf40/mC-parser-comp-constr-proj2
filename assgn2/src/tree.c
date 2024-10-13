@@ -1,9 +1,8 @@
 #include "tree.h"
-#include "parser.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "y.tab.h"
+#include "y.tab.h" 
 
 tree *ast = NULL;
 // TODO: implement printAst(tree *root, int nestLevel) addChild
@@ -17,10 +16,11 @@ const char* nodeTypeStrings[] = {
     "CONDSTMT", "LOOPSTMT", "RETURNSTMT", "EXPRESSION", "RELOP",
     "ADDEXPR", "ADDOP", "TERM", "MULOP", "FACTOR", "FUNCCALLEXPR",
     "ARGLIST", "INTEGER", "IDENTIFIER", "VAR", "ARRAYDECL", "CHAR",
-    "FUNCTYPENAME", "NODE_KWD_INT", "NODE_KWD_CHAR"
+    "FUNCTYPENAME", "NODE_KWD_INT", "NODE_KWD_CHAR", "STRING"
 };
 
 tree *maketree(nodeKind kind, int value) {
+    /*printf("DEBUG: Creating tree node of kind %d\n", kind);*/
     tree *node = (tree *)malloc(sizeof(tree));
     if (node == NULL) {
         fprintf(stderr, "ERROR: Memory allocation failed for node\n");
@@ -30,6 +30,7 @@ tree *maketree(nodeKind kind, int value) {
     node->val = value;
     node->numChildren = 0;
     node->parent = NULL;
+    /*printf("DEBUG: Finished creating tree node of kind %d\n", kind);*/    
     return node;
 }
 
@@ -42,13 +43,20 @@ tree* makeTreeNode(nodeKind kind, int value) {
 }
 
 void addChild(tree *parent, tree *child) {
+    if (parent == NULL) {
+        printf("ERROR: Attempting to add child to NULL parent\n");
+        return;
+    }
+    if (child == NULL) {
+        printf("WARNING: Attempting to add NULL child to parent of kind %d\n", parent->nodeKind);
+        return;
+    }
     if (parent->numChildren < MAXCHILDREN) {
         parent->children[parent->numChildren] = child;
         parent->numChildren++;
         child->parent = parent;
     } else {
-        // Handle error: too many children
-        fprintf(stderr, "Error: Too many children for node\n");
+        fprintf(stderr, "Error: Too many children for node of kind %d\n", parent->nodeKind);
     }
 }
 
@@ -65,7 +73,7 @@ void printAstDebug(tree *t, int nestLevel) {
     switch(t->nodeKind) {
         case IDENTIFIER:
             if (t->strval != NULL) {
-                printf("  Name: %s\n", t->strval);
+                printf("  Name, %s\n", t->strval);
             } else {
                 printf("  WARNING: NULL identifier name\n");
             }
@@ -116,16 +124,19 @@ void printAst(tree *t, int level) {
     
     switch(t->nodeKind) {
         case PROGRAM:
-            printf("Program\n");
+            printf("program\n");
             break;
         case DECLLIST:
-            printf("DeclList\n");
+            printf("declList\n");
             break;
         case FUNDECL:
-            printf("FunDecl\n");
+            printf("funDecl\n");
+            break;
+        case FUNCTYPENAME:
+            printf("funcTypeName\n");
             break;
         case TYPESPEC:
-            printf("TypeSpec: ");
+            printf("typeSpecifier, ");
             switch(t->val) {
                 case KWD_INT: printf("int\n"); break;
                 case KWD_CHAR: printf("char\n"); break;
@@ -134,61 +145,61 @@ void printAst(tree *t, int level) {
             }
             break;
         case IDENTIFIER:
-            printf("Identifier: %s\n", t->strval);
+            printf("identifier, %s\n", t->strval);
             break;
         case VARDECL:
-            printf("VarDecl\n");
+            printf("varDecl\n");
             break;
         case FORMALDECLLIST:
-            printf("FormalDeclList\n");
+            printf("formalDeclList\n");
             break;
         case FORMALDECL:
-            printf("FormalDecl\n");
+            printf("formalDecl\n");
             break;
         case LOCALDECLLIST:
-            printf("LocalDeclList\n");
+            printf("localDeclList\n");
             break;
         case STATEMENTLIST:
-            printf("StatementList\n");
+            printf("statementList\n");
             break;
         case COMPOUNDSTMT:
-            printf("CompoundStmt\n");
+            /*printf("compoundStmt\n");*/
             break;
         case EXPRESSION:
-            printf("Expression\n");
+            printf("expression\n");
             break;
         case ADDEXPR:
-            printf("AddExpr\n");
+            printf("addExpr\n");
             break;
         case TERM:
-            printf("Term\n");
+            printf("term\n");
             break;
         case FACTOR:
-            printf("Factor\n");
+            printf("factor\n");
             break;
         case INTEGER:
-            printf("Integer: %d\n", t->val);
+            printf("integer, %d\n", t->val);
             break;
         case VAR:
-            printf("Var\n");
+            printf("var\n");
             break;
         case STATEMENT:
-            printf("Statement\n");
+            printf("statement\n");
             break;
         case CONDSTMT:
-            printf("CondStmt\n");
+            printf("condStmt\n");
             break;
         case LOOPSTMT:
-            printf("LoopStmt\n");
+            printf("loopStmt\n");
             break;
         case RETURNSTMT:
-            printf("ReturnStmt\n");
+            printf("returnStmt\n");
             break;
         case ASSIGNSTMT:
-            printf("AssignStmt\n");
+            printf("assignStmt\n");
             break;
         case ADDOP:
-            printf("AddOp: ");
+            printf("addop, ");
             switch(t->val) {
                 case OPER_ADD: printf("+\n"); break;
                 case OPER_SUB: printf("-\n"); break;
@@ -196,7 +207,7 @@ void printAst(tree *t, int level) {
             }
             break;
         case MULOP:
-            printf("MulOp: ");
+            printf("mulop, ");
             switch(t->val) {
                 case OPER_MUL: printf("*\n"); break;
                 case OPER_DIV: printf("/\n"); break;
@@ -204,7 +215,7 @@ void printAst(tree *t, int level) {
             }
             break;
         case RELOP:
-            printf("RelOp: ");
+            printf("relop, ");
             switch(t->val) {
                 case OPER_LT: printf("<\n"); break;
                 case OPER_LTE: printf("<=\n"); break;
@@ -216,10 +227,10 @@ void printAst(tree *t, int level) {
             }
             break;
         case CHAR:
-            printf("Char: %c\n", (char)t->val);
+            printf("char, %c\n", (char)t->val);
             break;
         default:
-            printf("Unknown node type: %s (%d)\n", nodeTypeStrings[t->nodeKind], t->nodeKind);
+            printf("unknown node type, %s (%d)\n", nodeTypeStrings[t->nodeKind], t->nodeKind);
     }
 
     for (int i = 0; i < t->numChildren; i++) {

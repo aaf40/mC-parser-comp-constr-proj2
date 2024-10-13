@@ -10,7 +10,7 @@ GRAMMAR=parser.y
 obj/mcc: obj/lex.yy.o obj/y.tab.o obj/tree.o obj/driver.o obj/strtab.o | obj
 	$(CC) $(CFLAGS) -o $@ $^ -lfl
 
-obj/y.tab.h obj/y.tab.c: src/$(GRAMMAR) src/tree.h | obj
+obj/y.tab.h obj/y.tab.c: src/$(GRAMMAR) | obj
 	$(YACC) $(YFLAGS) $<
 
 obj/y.tab.o: obj/y.tab.c | obj
