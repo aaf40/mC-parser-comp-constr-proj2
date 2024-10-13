@@ -3,6 +3,7 @@
 #include <string.h>
 #include "tree.h"
 #include "strtab.h"
+#include "y.tab.h"  // Add this line
 
 int yyparse(void);
 extern tree *ast;  // Add this line if it's not already present
@@ -19,7 +20,6 @@ int main() {
         /*printf("DEBUG: Parsing completed. About to print AST.\n");
         fflush(stdout);*/
         if (ast != NULL) {
-            printf("AST:\n");
             printAst(ast, 0);
         } else {
             printf("ERROR: AST is NULL\n");

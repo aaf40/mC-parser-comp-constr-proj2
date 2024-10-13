@@ -10,7 +10,7 @@ GRAMMAR=parser.y
 obj/mcc: obj/lex.yy.o obj/y.tab.o obj/tree.o obj/driver.o obj/strtab.o | obj
 	$(CC) $(CFLAGS) -o $@ $^ -lfl
 
-obj/y.tab.h obj/y.tab.c: src/$(GRAMMAR) src/tree.h | obj
+obj/y.tab.h obj/y.tab.c: src/$(GRAMMAR) | obj
 	$(YACC) $(YFLAGS) $<
 
 obj/y.tab.o: obj/y.tab.c | obj
@@ -31,7 +31,7 @@ obj/driver.o: src/driver.c src/tree.h obj/y.tab.h | obj
 obj/strtab.o: src/strtab.c src/strtab.h obj/y.tab.h | obj
 	$(CC) $(CFLAGS) -c $< -o $@
 
-.PHONY: clean test objdir
+.PHONY: clean test objdir testAll
 
 obj:
 	@mkdir -p obj
@@ -43,12 +43,15 @@ clean:
 test: obj/mcc
 	@python ./test/testParser.py
 
-fulltest: obj/mcc
+.PHONY: testAll
+
+testAll: obj/mcc
 	@for file in test/*.mC; do \
 		echo "Testing $$file:"; \
-		./obj/mcc $$file < /dev/null > "$$file.out" 2>&1 || echo "Error occurred"; \
+		./obj/mcc < "$$file" > "$$file.out" 2>&1 || echo "Error occurred"; \
+		echo "Output:"; \
 		cat "$$file.out"; \
 		echo "Exit status: $$?"; \
-		echo ""; \
+		echo "----------------------------------------"; \
 	done
 	@rm -f test/*.out

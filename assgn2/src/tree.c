@@ -1,9 +1,8 @@
 #include "tree.h"
-#include "parser.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "y.tab.h"
+#include "y.tab.h" 
 
 tree *ast = NULL;
 // TODO: implement printAst(tree *root, int nestLevel) addChild
@@ -11,16 +10,17 @@ tree *ast = NULL;
 
 // Node type strings
 const char* nodeTypeStrings[] = {
-    "PROGRAM", "DECLLIST", "DECL", "VARDECL", "TYPESPEC", "FUNDECL",
-    "FORMALDECLLIST", "FORMALDECL", "FUNBODY", "LOCALDECLLIST",
-    "STATEMENTLIST", "STATEMENT", "COMPOUNDSTMT", "ASSIGNSTMT",
-    "CONDSTMT", "LOOPSTMT", "RETURNSTMT", "EXPRESSION", "RELOP",
-    "ADDEXPR", "ADDOP", "TERM", "MULOP", "FACTOR", "FUNCCALLEXPR",
-    "ARGLIST", "INTEGER", "IDENTIFIER", "VAR", "ARRAYDECL", "CHAR",
-    "FUNCTYPENAME", "NODE_KWD_INT", "NODE_KWD_CHAR"
+    "program", "decList", "decl", "varDecl", "typeSpecifier", "funDecl",
+    "formalDeclList", "formalDecl", "funBody", "localDeclList",
+    "statementList", "statement", "compoundStmt", "assignStmt",
+    "condStmt", "loopStmt", "returnStmt", "expression", "relop",
+    "addExpr", "addop", "term", "mulop", "factor", "funcCallExpr",
+    "argList", "integer", "identifier", "var", "arrayDecl", "char",
+    "funcTypeName", "string"
 };
 
 tree *maketree(nodeKind kind, int value) {
+    /*printf("DEBUG: Creating tree node of kind %d\n", kind);*/
     tree *node = (tree *)malloc(sizeof(tree));
     if (node == NULL) {
         fprintf(stderr, "ERROR: Memory allocation failed for node\n");
@@ -30,6 +30,7 @@ tree *maketree(nodeKind kind, int value) {
     node->val = value;
     node->numChildren = 0;
     node->parent = NULL;
+    /*printf("DEBUG: Finished creating tree node of kind %d\n", kind);*/    
     return node;
 }
 
@@ -42,13 +43,20 @@ tree* makeTreeNode(nodeKind kind, int value) {
 }
 
 void addChild(tree *parent, tree *child) {
+    if (parent == NULL) {
+        printf("ERROR: Attempting to add child to NULL parent\n");
+        return;
+    }
+    if (child == NULL) {
+        printf("WARNING: Attempting to add NULL child to parent of kind %d\n", parent->nodeKind);
+        return;
+    }
     if (parent->numChildren < MAXCHILDREN) {
         parent->children[parent->numChildren] = child;
         parent->numChildren++;
         child->parent = parent;
     } else {
-        // Handle error: too many children
-        fprintf(stderr, "Error: Too many children for node\n");
+        fprintf(stderr, "Error: Too many children for node of kind %d\n", parent->nodeKind);
     }
 }
 
@@ -65,7 +73,7 @@ void printAstDebug(tree *t, int nestLevel) {
     switch(t->nodeKind) {
         case IDENTIFIER:
             if (t->strval != NULL) {
-                printf("  Name: %s\n", t->strval);
+                printf("  Name, %s\n", t->strval);
             } else {
                 printf("  WARNING: NULL identifier name\n");
             }
@@ -111,117 +119,27 @@ void printIndent(int level) {
 
 void printAst(tree *t, int level) {
     if (t == NULL) return;
-
+    
     printIndent(level);
     
     switch(t->nodeKind) {
-        case PROGRAM:
-            printf("Program\n");
-            break;
-        case DECLLIST:
-            printf("DeclList\n");
-            break;
-        case FUNDECL:
-            printf("FunDecl\n");
-            break;
         case TYPESPEC:
-            printf("TypeSpec: ");
-            switch(t->val) {
-                case KWD_INT: printf("int\n"); break;
-                case KWD_CHAR: printf("char\n"); break;
-                case KWD_VOID: printf("void\n"); break;
-                default: printf("unknown (%d)\n", t->val);
-            }
+            printf("%s,%s\n", nodeTypeStrings[t->nodeKind], 
+                   t->val == KWD_INT ? "int" : (t->val == KWD_CHAR ? "char" : "void"));
             break;
         case IDENTIFIER:
-            printf("Identifier: %s\n", t->strval);
-            break;
-        case VARDECL:
-            printf("VarDecl\n");
-            break;
-        case FORMALDECLLIST:
-            printf("FormalDeclList\n");
-            break;
-        case FORMALDECL:
-            printf("FormalDecl\n");
-            break;
-        case LOCALDECLLIST:
-            printf("LocalDeclList\n");
-            break;
-        case STATEMENTLIST:
-            printf("StatementList\n");
-            break;
-        case COMPOUNDSTMT:
-            printf("CompoundStmt\n");
-            break;
-        case EXPRESSION:
-            printf("Expression\n");
-            break;
-        case ADDEXPR:
-            printf("AddExpr\n");
-            break;
-        case TERM:
-            printf("Term\n");
-            break;
-        case FACTOR:
-            printf("Factor\n");
+            printf("%s,%s\n", nodeTypeStrings[t->nodeKind], t->strval);
             break;
         case INTEGER:
-            printf("Integer: %d\n", t->val);
-            break;
-        case VAR:
-            printf("Var\n");
-            break;
-        case STATEMENT:
-            printf("Statement\n");
-            break;
-        case CONDSTMT:
-            printf("CondStmt\n");
-            break;
-        case LOOPSTMT:
-            printf("LoopStmt\n");
-            break;
-        case RETURNSTMT:
-            printf("ReturnStmt\n");
-            break;
-        case ASSIGNSTMT:
-            printf("AssignStmt\n");
+            printf("%s,%d\n", nodeTypeStrings[t->nodeKind], t->val);
             break;
         case ADDOP:
-            printf("AddOp: ");
-            switch(t->val) {
-                case OPER_ADD: printf("+\n"); break;
-                case OPER_SUB: printf("-\n"); break;
-                default: printf("unknown (%d)\n", t->val);
-            }
-            break;
-        case MULOP:
-            printf("MulOp: ");
-            switch(t->val) {
-                case OPER_MUL: printf("*\n"); break;
-                case OPER_DIV: printf("/\n"); break;
-                default: printf("unknown (%d)\n", t->val);
-            }
-            break;
-        case RELOP:
-            printf("RelOp: ");
-            switch(t->val) {
-                case OPER_LT: printf("<\n"); break;
-                case OPER_LTE: printf("<=\n"); break;
-                case OPER_GT: printf(">\n"); break;
-                case OPER_GTE: printf(">=\n"); break;
-                case OPER_EQ: printf("==\n"); break;
-                case OPER_NEQ: printf("!=\n"); break;
-                default: printf("unknown (%d)\n", t->val);
-            }
-            break;
-        case CHAR:
-            printf("Char: %c\n", (char)t->val);
+            printf("%s,%c\n", nodeTypeStrings[t->nodeKind], t->val == OPER_ADD ? '+' : '-');
             break;
         default:
-            printf("Unknown node type: %s (%d)\n", nodeTypeStrings[t->nodeKind], t->nodeKind);
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
     }
-
+    
     for (int i = 0; i < t->numChildren; i++) {
         printAst(t->children[i], level + 1);
     }

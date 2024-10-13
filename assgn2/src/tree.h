@@ -3,10 +3,14 @@
 
 #define MAXCHILDREN 12
 
-#include "parser.h"
-
 // Forward declare the NodeKind enum
-typedef enum nodeKind nodeKind;
+typedef enum nodeKind {
+    PROGRAM, DECLLIST, DECL, VARDECL, TYPESPEC, FUNDECL, FORMALDECLLIST, FORMALDECL, FUNBODY,
+    LOCALDECLLIST, STATEMENTLIST, STATEMENT, COMPOUNDSTMT, ASSIGNSTMT, CONDSTMT, LOOPSTMT,
+    RETURNSTMT, EXPRESSION, RELOP, ADDEXPR, ADDOP, TERM, MULOP, FACTOR, FUNCCALLEXPR,
+    ARGLIST, INTEGER, IDENTIFIER, VAR, ARRAYDECL, CHAR, FUNCTYPENAME, 
+    EXPRSTMT, STRING
+} nodeKind;
 
 typedef struct treenode tree;
 
@@ -16,7 +20,8 @@ struct treenode {
       int numChildren;
       int val;
       char *strval;
-      int opType;
+      // Remove or comment out the opType field if it's not needed
+      // int opType;
       tree *parent;
       tree *children[MAXCHILDREN];
 };

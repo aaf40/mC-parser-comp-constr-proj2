@@ -3,9 +3,6 @@
 %{
 #include <stdio.h>
 #include "y.tab.h"
-#include <stdio.h>
-#include "y.tab.h"
-#include "parser.h"
 
 int scancol = 1;
 int yycol = 1;
@@ -14,8 +11,9 @@ int scanlineno = 1;
 char* yyerrormsg;
 void updateCol();
 void countLines();
-int get_token(void);
 %}
+
+%option yylineno
 
 newline         \n
 whitespace      [ \t]+
@@ -29,8 +27,6 @@ untermcomment   \/\*\/?([^\/\n]|[^\*]\/)*
 
 identifier      [a-zA-Z][a-zA-Z0-9]*
 illidentifier   [0-9]+[a-zA-Z][a-zA-Z0-9]*
-
-yylineno = 1;
 
 %%
 
@@ -108,12 +104,4 @@ void countLines(){
         if (yytext[i] == '\n')
             scanlineno++;
     }
-}
-
-#undef yylex
-int get_token(void) {
-    int token = yylex();
-    /*printf("DEBUG: Scanned token: %d (%s)\n", token, yytext);*/
-    fflush(stdout);
-    return token;
 }
