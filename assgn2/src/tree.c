@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "y.tab.h"
 
 tree *ast = NULL;
 // TODO: implement printAst(tree *root, int nestLevel) addChild
@@ -111,143 +112,117 @@ void printIndent(int level) {
 void printAst(tree *t, int level) {
     if (t == NULL) return;
 
-    // Nodes that should not increase indentation
-    int noIndentIncrease = (t->nodeKind == COMPOUNDSTMT || 
-                            t->nodeKind == LOCALDECLLIST ||
-                            t->nodeKind == FORMALDECLLIST);
-
-    // Skip printing for these nodes
-    int skipPrinting = (t->nodeKind == COMPOUNDSTMT || 
-                        t->nodeKind == LOCALDECLLIST ||
-                        t->nodeKind == FORMALDECLLIST);
-
-    // Adjust indentation for statements under statementList
-    if (t->parent && t->parent->nodeKind == STATEMENTLIST) {
-        level++;
+    printIndent(level);
+    
+    switch(t->nodeKind) {
+        case PROGRAM:
+            printf("Program\n");
+            break;
+        case DECLLIST:
+            printf("DeclList\n");
+            break;
+        case FUNDECL:
+            printf("FunDecl\n");
+            break;
+        case TYPESPEC:
+            printf("TypeSpec: ");
+            switch(t->val) {
+                case KWD_INT: printf("int\n"); break;
+                case KWD_CHAR: printf("char\n"); break;
+                case KWD_VOID: printf("void\n"); break;
+                default: printf("unknown (%d)\n", t->val);
+            }
+            break;
+        case IDENTIFIER:
+            printf("Identifier: %s\n", t->strval);
+            break;
+        case VARDECL:
+            printf("VarDecl\n");
+            break;
+        case FORMALDECLLIST:
+            printf("FormalDeclList\n");
+            break;
+        case FORMALDECL:
+            printf("FormalDecl\n");
+            break;
+        case LOCALDECLLIST:
+            printf("LocalDeclList\n");
+            break;
+        case STATEMENTLIST:
+            printf("StatementList\n");
+            break;
+        case COMPOUNDSTMT:
+            printf("CompoundStmt\n");
+            break;
+        case EXPRESSION:
+            printf("Expression\n");
+            break;
+        case ADDEXPR:
+            printf("AddExpr\n");
+            break;
+        case TERM:
+            printf("Term\n");
+            break;
+        case FACTOR:
+            printf("Factor\n");
+            break;
+        case INTEGER:
+            printf("Integer: %d\n", t->val);
+            break;
+        case VAR:
+            printf("Var\n");
+            break;
+        case STATEMENT:
+            printf("Statement\n");
+            break;
+        case CONDSTMT:
+            printf("CondStmt\n");
+            break;
+        case LOOPSTMT:
+            printf("LoopStmt\n");
+            break;
+        case RETURNSTMT:
+            printf("ReturnStmt\n");
+            break;
+        case ASSIGNSTMT:
+            printf("AssignStmt\n");
+            break;
+        case ADDOP:
+            printf("AddOp: ");
+            switch(t->val) {
+                case OPER_ADD: printf("+\n"); break;
+                case OPER_SUB: printf("-\n"); break;
+                default: printf("unknown (%d)\n", t->val);
+            }
+            break;
+        case MULOP:
+            printf("MulOp: ");
+            switch(t->val) {
+                case OPER_MUL: printf("*\n"); break;
+                case OPER_DIV: printf("/\n"); break;
+                default: printf("unknown (%d)\n", t->val);
+            }
+            break;
+        case RELOP:
+            printf("RelOp: ");
+            switch(t->val) {
+                case OPER_LT: printf("<\n"); break;
+                case OPER_LTE: printf("<=\n"); break;
+                case OPER_GT: printf(">\n"); break;
+                case OPER_GTE: printf(">=\n"); break;
+                case OPER_EQ: printf("==\n"); break;
+                case OPER_NEQ: printf("!=\n"); break;
+                default: printf("unknown (%d)\n", t->val);
+            }
+            break;
+        case CHAR:
+            printf("Char: %c\n", (char)t->val);
+            break;
+        default:
+            printf("Unknown node type: %s (%d)\n", nodeTypeStrings[t->nodeKind], t->nodeKind);
     }
 
-    // Print indentation and node information
-    if (!skipPrinting) {
-        printIndent(level);
-        
-        switch(t->nodeKind) {
-            case PROGRAM:
-                printf("program\n");
-                break;
-            case DECLLIST:
-                printf("declList\n");
-                break;
-            case DECL:
-                printf("decl\n");
-                break;
-            case VARDECL:
-                printf("varDecl\n");
-                break;
-            case FUNDECL:
-                printf("funDecl\n");
-                break;
-            case FUNCTYPENAME:
-                printf("funcTypeName\n");
-                break;
-            case TYPESPEC:
-                printf("typeSpecifier,");
-                switch(t->val) {
-                    case KWD_INT: printf("int\n"); break;
-                    case KWD_CHAR: printf("char\n"); break;
-                    case KWD_VOID: printf("void\n"); break;
-                    default: printf("unknown\n");
-                }
-                break;
-            case IDENTIFIER:
-                printf("identifier,%s\n", t->strval);
-                break;
-            case FUNBODY:
-                printf("funBody\n");
-                break;
-            case STATEMENTLIST:
-                printf("statementList\n");
-                break;
-            case STATEMENT:
-                printf("statement\n");
-                break;
-            case ASSIGNSTMT:
-                printf("assignStmt\n");
-                break;
-            case EXPRESSION:
-                printf("expression\n");
-                break;
-            case ADDEXPR:
-                printf("addExpr\n");
-                break;
-            case TERM:
-                printf("term\n");
-                break;
-            case FACTOR:
-                printf("factor\n");
-                break;
-            case INTEGER:
-                printf("integer,%d\n", t->val);
-                break;
-            case ADDOP:
-                printf("addop,");
-                switch(t->val) {
-                    case OPER_ADD: printf("+\n"); break;
-                    case OPER_SUB: printf("-\n"); break;
-                    default: printf("unknown\n");
-                }
-                break;
-            case MULOP:
-                printf("mulop,");
-                switch(t->val) {
-                    case OPER_MUL: printf("*\n"); break;
-                    case OPER_DIV: printf("/\n"); break;
-                    default: printf("unknown\n");
-                }
-                break;
-            case VAR:
-                printf("var\n");
-                break;
-            case ARRAYDECL:
-                printf("arrayDecl\n");
-                break;
-            case CONDSTMT:
-                printf("condStmt\n");
-                break;
-            case LOOPSTMT:
-                printf("loopStmt\n");
-                break;
-            case RETURNSTMT:
-                printf("returnStmt\n");
-                break;
-            case RELOP:
-                printf("relop,");
-                switch(t->val) {
-                    case OPER_LT: printf("<\n"); break;
-                    case OPER_LTE: printf("<=\n"); break;
-                    case OPER_GT: printf(">\n"); break;
-                    case OPER_GTE: printf(">=\n"); break;
-                    case OPER_EQ: printf("==\n"); break;
-                    case OPER_NEQ: printf("!=\n"); break;
-                    default: printf("unknown\n");
-                }
-                break;
-            case FUNCCALLEXPR:
-                printf("funcCallExpr\n");
-                break;
-            case ARGLIST:
-                printf("argList\n");
-                break;
-            default:
-                printf("%s\n", nodeTypeStrings[t->nodeKind]);
-        }
-    }
-
-    // Recursively print children
     for (int i = 0; i < t->numChildren; i++) {
-        int childLevel = level;
-        if (!noIndentIncrease) {
-            childLevel++;
-        }
-        printAst(t->children[i], childLevel);
+        printAst(t->children[i], level + 1);
     }
 }

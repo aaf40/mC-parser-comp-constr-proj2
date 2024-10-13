@@ -1,8 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "y.tab.h"
-
 int yyparse(void);
 int yylex(void);
 int yyerror(char *s);
@@ -15,5 +13,6 @@ typedef enum nodeKind {
     ARGLIST, INTEGER, IDENTIFIER, VAR, ARRAYDECL, CHAR, FUNCTYPENAME, 
     NODE_KWD_INT, NODE_KWD_CHAR
 } nodeKind;
+
 
 #endif // PARSER_H

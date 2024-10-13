@@ -124,38 +124,27 @@ varDecl         : typeSpec ID SEMICLN
 
 funDecl : typeSpec ID LPAREN formalDeclList RPAREN compoundStmt
         {
-            $$ = maketree(DECL, 0);
-            tree *funDeclNode = maketree(FUNDECL, 0);
-            addChild($$, funDeclNode);
+            $$ = maketree(FUNDECL, 0);
+            addChild($$, $1);  // typeSpec
+            addChild($$, maketree(IDENTIFIER, 0));
+            $$->children[1]->strval = $2;  // ID
+            addChild($$, $4);  // formalDeclList
+            addChild($$, $6);  // compoundStmt
             
-            tree *funcTypeName = maketree(FUNCTYPENAME, 0);
-            addChild(funDeclNode, funcTypeName);
-            addChild(funcTypeName, $1);  // typeSpec
-            addChild(funcTypeName, maketree(IDENTIFIER, 0));
-            funcTypeName->children[1]->strval = $2;  // ID
-            
-            addChild(funDeclNode, $4);  // formalDeclList
-            
-            tree *funBody = maketree(FUNBODY, 0);
-            addChild(funDeclNode, funBody);
-            addChild(funBody, $6);  // compoundStmt
-            
+            // Update scope for symbol table
             scope = $2;
             ST_insert($2, "", $1->val, FUNCTION);
+            
             scope = "";  // Reset to global scope after function
         }
         | typeSpec ID LPAREN RPAREN compoundStmt
         {
             $$ = maketree(FUNDECL, 0);
-            tree *funcTypeName = maketree(FUNCTYPENAME, 0);
-            addChild(funcTypeName, $1);  // typeSpec
-            addChild(funcTypeName, maketree(IDENTIFIER, 0));
-            funcTypeName->children[1]->strval = $2;  // ID
-            addChild($$, funcTypeName);
+            addChild($$, $1);  // typeSpec
+            addChild($$, maketree(IDENTIFIER, 0));
+            $$->children[1]->strval = $2;  // ID
             addChild($$, maketree(FORMALDECLLIST, 0));  // empty formal decl list
-            tree *funBody = maketree(FUNBODY, 0);
-            addChild(funBody, $5);  // compoundStmt
-            addChild($$, funBody);
+            addChild($$, $5);  // compoundStmt
             
             // Update scope for symbol table
             scope = $2;
@@ -214,10 +203,9 @@ localDeclList : /* empty */
               }
               ;
 
-statementList : statement
+statementList : /* empty */
               {
                   $$ = maketree(STATEMENTLIST, 0);
-                  addChild($$, $1);
               }
               | statementList statement
               {
@@ -234,19 +222,14 @@ statement : assignStmt
           | expression SEMICLN
           {
               $$ = maketree(STATEMENT, 0);
-              addChild($$, maketree(ASSIGNSTMT, 0));
-              addChild($$->children[0], $1);
+              addChild($$, $1);
           }
           ;
 assignStmt : var OPER_ASGN expression SEMICLN
            {
                $$ = maketree(ASSIGNSTMT, 0);
                addChild($$, $1);  // var
-               tree *exprNode = maketree(EXPRESSION, 0);
-               addChild(exprNode, $3);  // Wrap the existing expression
-               addChild($$, exprNode);  // Add the EXPRESSION node to ASSIGNSTMT
-               printf("DEBUG: Created ASSIGNSTMT with %d children\n", $$->numChildren);
-               printf("DEBUG: Second child of ASSIGNSTMT is of type %d\n", $$->children[1]->nodeKind);
+               addChild($$, $3);  // expression
            }
            ;
 
@@ -281,8 +264,8 @@ var : ID
 
 expression : addExpr
            {
-               $$ = maketree(EXPRESSION, 0);
-               addChild($$, $1);
+               /*printf("DEBUG: Reducing expression\n");*/
+               $$ = $1;
            }
            | expression relop addExpr
            {
@@ -353,11 +336,12 @@ relop : OPER_LT
 
 addExpr : mulExpr
         {
-            $$ = maketree(ADDEXPR, 0);
-            addChild($$, $1);
+            /*printf("DEBUG: Reducing addExpr (mulExpr)\n");*/
+            $$ = $1;
         }
         | addExpr addop mulExpr
         {
+            /*printf("DEBUG: Reducing addExpr (addExpr addop mulExpr)\n");*/
             $$ = maketree(ADDEXPR, 0);
             addChild($$, $1);
             addChild($$, $2);
@@ -382,11 +366,10 @@ mulExpr : factor
         }
         | mulExpr mulop factor
         {
-            tree *newTerm = maketree(TERM, 0);
-            addChild(newTerm, $1);
-            addChild(newTerm, $2);
-            addChild(newTerm, $3);
-            $$ = newTerm;
+            $$ = maketree(TERM, 0);
+            addChild($$, $1);
+            addChild($$, $2);
+            addChild($$, $3);
         }
         ;
 
@@ -402,23 +385,19 @@ mulop : OPER_MUL
 
 factor : var
        {
-           $$ = maketree(FACTOR, 0);
-           addChild($$, $1);
+           $$ = $1;
        }
        | integer
        {
-           $$ = maketree(FACTOR, 0);
-           addChild($$, $1);
+           $$ = $1;  // This is correct now, as integer is of type <node>
        }
        | LPAREN expression RPAREN
        {
-           $$ = maketree(FACTOR, 0);
-           addChild($$, $2);
+           $$ = $2;
        }
        | funcCallExpr
        {
-           $$ = maketree(FACTOR, 0);
-           addChild($$, $1);
+           $$ = $1;
        }
        ;
 
