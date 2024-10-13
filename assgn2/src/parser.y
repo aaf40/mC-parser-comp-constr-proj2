@@ -298,7 +298,8 @@ var             : ID
 
 expression      : addExpr
                 {
-                    $$ = $1;
+                    $$ = maketree(EXPRESSION, 0);
+                    addChild($$, $1);
                 }
                 | expression relop addExpr
                 {

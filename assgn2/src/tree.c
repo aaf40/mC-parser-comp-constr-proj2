@@ -159,6 +159,32 @@ void printAst(tree *t, int level) {
                 printAst(t->children[i], level + 2);
             }
             break;
+        case EXPRESSION:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case ADDEXPR:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            printAst(t->children[0], level + 1);  // Print first term
+            for (int i = 1; i < t->numChildren; i += 2) {
+                printAst(t->children[i], level + 1);     // Print addop
+                printAst(t->children[i+1], level + 1);   // Print next term
+            }
+            break;
+        case TERM:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            printAst(t->children[0], level + 1);  // Print first factor
+            for (int i = 1; i < t->numChildren; i += 2) {
+                printAst(t->children[i], level + 1);     // Print mulop
+                printAst(t->children[i+1], level + 1);   // Print next factor
+            }
+            break;
+        case FACTOR:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            printAst(t->children[0], level + 1);  // Print integer, identifier, or nested expression
+            break;
         case TYPESPEC:
             printf("%s,%s\n", nodeTypeStrings[t->nodeKind], 
                    t->val == KWD_INT ? "int" : (t->val == KWD_CHAR ? "char" : "void"));
