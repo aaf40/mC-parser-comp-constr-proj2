@@ -55,3 +55,19 @@ testAll: obj/mcc
 		echo "----------------------------------------"; \
 	done
 	@rm -f test/*.out
+
+.PHONY: testAll2
+
+testAll2: obj/mcc
+	@echo "Running all tests and writing output to testOutput.txt"
+	@echo "" > testOutput.txt
+	@for file in test/*.mC; do \
+		echo "Testing $$file:" >> testOutput.txt; \
+		./obj/mcc < "$$file" > "$$file.out" 2>&1 || echo "Error occurred" >> testOutput.txt; \
+		echo "Output:" >> testOutput.txt; \
+		cat "$$file.out" >> testOutput.txt; \
+		echo "Exit status: $$?" >> testOutput.txt; \
+		echo "----------------------------------------" >> testOutput.txt; \
+	done
+	@rm -f test/*.out
+	@echo "Test results have been written to testOutput.txt"
