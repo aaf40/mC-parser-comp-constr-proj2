@@ -390,15 +390,18 @@ mulop           : OPER_MUL
 
 factor          : LPAREN expression RPAREN
                 {
-                    $$ = $2;  // Just pass up the expression node
+                    $$ = maketree(FACTOR, 0);
+                    addChild($$, $2);  // Wrap the expression in a FACTOR node
                 }
                 | var
                 {
-                    $$ = $1;
+                    $$ = maketree(FACTOR, 0);
+                    addChild($$, $1);
                 }
                 | funcCallExpr
                 {
-                    $$ = $1;
+                    $$ = maketree(FACTOR, 0);
+                    addChild($$, $1);
                 }
                 | INTCONST
                 {
