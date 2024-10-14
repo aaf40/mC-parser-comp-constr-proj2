@@ -153,10 +153,13 @@ void printAst(tree *t, int level) {
             break;
         case STATEMENTLIST:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
-            for (int i = 0; i < t->numChildren; i++) {
+            if (t->numChildren > 0) {
                 printIndent(level + 1);
                 printf("statement\n");
-                printAst(t->children[i], level + 2);
+                printAst(t->children[0], level + 2);  // Print the statement
+                if (t->numChildren > 1) {
+                    printAst(t->children[1], level);  // Print the rest of the statementList
+                }
             }
             break;
         case EXPRESSION:

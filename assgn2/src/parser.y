@@ -194,13 +194,15 @@ localDeclList   : /* empty */
 
 statementList   : /* empty */
                 {
-                    $$ = maketree(STATEMENTLIST, 0);
+                    $$ = NULL;
                 }
                 | statement statementList
                 {
                     $$ = maketree(STATEMENTLIST, 0);
-                    addChild($$, $1);
-                    addChild($$, $2);
+                    addChild($$, $1);  // Add the new statement
+                    if ($2 != NULL) {
+                        addChild($$, $2);  // Add the rest of the statementList if it exists
+                    }
                 }
                 ;
 
