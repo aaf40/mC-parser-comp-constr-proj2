@@ -340,14 +340,16 @@ relop           : OPER_LTE
 
 addExpr         : term
                 {
-                    $$ = $1;
+                    $$ = maketree(ADDEXPR, 0);
+                    addChild($$, $1);
                 }
                 | addExpr addop term
                 {
-                    $$ = maketree(ADDEXPR, 0);
-                    addChild($$, $1);  // left addExpr
-                    addChild($$, $2);  // addop
-                    addChild($$, $3);  // right term
+                    tree *newExpr = maketree(ADDEXPR, 0);
+                    addChild(newExpr, $1);  // left addExpr
+                    addChild(newExpr, $2);  // addop
+                    addChild(newExpr, $3);  // right term
+                    $$ = newExpr;
                 }
                 ;
 
@@ -363,14 +365,16 @@ addop           : OPER_ADD
 
 term            : factor
                 {
-                    $$ = $1;
+                    $$ = maketree(TERM, 0);
+                    addChild($$, $1);
                 }
                 | term mulop factor
                 {
-                    $$ = maketree(TERM, 0);
-                    addChild($$, $1);  // left term
-                    addChild($$, $2);  // mulop
-                    addChild($$, $3);  // right factor
+                    tree *newTerm = maketree(TERM, 0);
+                    addChild(newTerm, $1);  // left term
+                    addChild(newTerm, $2);  // mulop
+                    addChild(newTerm, $3);  // right factor
+                    $$ = newTerm;
                 }
                 ;
 
