@@ -175,8 +175,8 @@ formalDecl      : typeSpecifier ID
 funBody         : LCRLY_BRKT localDeclList statementList RCRLY_BRKT
                 {
                     $$ = maketree(FUNBODY, 0);
-                    addChild($$, $2);
-                    addChild($$, $3);
+                    if ($2 != NULL) addChild($$, $2);
+                    if ($3 != NULL) addChild($$, $3);
                 }
                 ;
 
@@ -188,7 +188,7 @@ localDeclList   : /* empty */
                 {
                     $$ = maketree(LOCALDECLLIST, 0);
                     addChild($$, $1);
-                    addChild($$, $2);
+                    if ($2 != NULL) addChild($$, $2);
                 }
                 ;
 
