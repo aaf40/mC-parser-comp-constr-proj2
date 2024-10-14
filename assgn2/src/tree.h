@@ -16,14 +16,15 @@ typedef struct treenode tree;
 
 /* tree node - you may need to add more fields or change this file however you see fit. */
 struct treenode {
-      nodeKind nodeKind;
-      int numChildren;
-      int val;
-      char *strval;
-      // Remove or comment out the opType field if it's not needed
-      // int opType;
-      tree *parent;
-      tree *children[MAXCHILDREN];
+    nodeKind nodeKind;
+    int numChildren;
+    int val;
+    char *strval;
+    int symbol_type;
+    int op;
+    int *arg_types;
+    tree *parent;
+    tree *children[MAXCHILDREN];
 };
 
 extern tree *ast; /* pointer to AST root */
@@ -49,5 +50,7 @@ void printIndent(int level);
 /* prints the ast recursively starting from the root of the ast. */
 void printAst(tree *root, int nestLevel);
 
+/* returns the string representation of the relop value*/
+const char* getRelopString(int val);
 
 #endif

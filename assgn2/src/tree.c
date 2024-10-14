@@ -101,14 +101,22 @@ void printAstDebug(tree *t, int nestLevel) {
     fflush(stdout);
 }
 
-void freeAst(tree *t) {
-    if (t == NULL) return;
-    /*printf("DEBUG: Freeing node of type %d\n", t->nodeKind);
-    fflush(stdout);*/
-    for (int i = 0; i < t->numChildren; i++) {
-        freeAst(t->children[i]);
+void freeAst(tree *node) {
+    if (node == NULL) return;
+    
+    for (int i = 0; i < node->numChildren; i++) {
+        freeAst(node->children[i]);
     }
-    free(t);
+    
+    if (node->nodeKind == ARGLIST && node->arg_types != NULL) {
+        free(node->arg_types);
+    }
+    
+    if (node->strval != NULL) {
+        free(node->strval);
+    }
+    
+    free(node);
 }
 
 void printIndent(int level) {
@@ -130,17 +138,19 @@ void printAst(tree *t, int level) {
         case DECLLIST:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
             for (int i = 0; i < t->numChildren; i++) {
-                printIndent(level + 1);
-                printf("decl\n");
-                printAst(t->children[i], level + 2);
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case DECL:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
             }
             break;
         case FUNDECL:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
             for (int i = 0; i < t->numChildren; i++) {
-                if (t->children[i]->nodeKind != FORMALDECLLIST) {
-                    printAst(t->children[i], level + 1);
-                }
+                printAst(t->children[i], level + 1);
             }
             break;
         case FUNBODY:
@@ -153,13 +163,14 @@ void printAst(tree *t, int level) {
             break;
         case STATEMENTLIST:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
-            if (t->numChildren > 0) {
-                printIndent(level + 1);
-                printf("statement\n");
-                printAst(t->children[0], level + 2);  // Print the statement
-                if (t->numChildren > 1) {
-                    printAst(t->children[1], level);  // Print the rest of the statementList
-                }
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case STATEMENT:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
             }
             break;
         case EXPRESSION:
@@ -170,27 +181,24 @@ void printAst(tree *t, int level) {
             break;
         case ADDEXPR:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
-            printAst(t->children[0], level + 1);  // Print first term
-            for (int i = 1; i < t->numChildren; i += 2) {
-                printAst(t->children[i], level + 1);     // Print addop
-                printAst(t->children[i+1], level + 1);   // Print next term
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
             }
             break;
         case TERM:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
-            printAst(t->children[0], level + 1);  // Print first factor
-            for (int i = 1; i < t->numChildren; i += 2) {
-                printAst(t->children[i], level + 1);     // Print mulop
-                printAst(t->children[i+1], level + 1);   // Print next factor
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
             }
             break;
         case FACTOR:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
-            printAst(t->children[0], level + 1);  // Print integer, identifier, or nested expression
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
             break;
         case TYPESPEC:
-            printf("%s,%s\n", nodeTypeStrings[t->nodeKind], 
-                   t->val == KWD_INT ? "int" : (t->val == KWD_CHAR ? "char" : "void"));
+            printf("%s,%s\n", nodeTypeStrings[t->nodeKind], t->val == KWD_INT ? "int" : (t->val == KWD_CHAR ? "char" : "void"));
             break;
         case IDENTIFIER:
             printf("%s,%s\n", nodeTypeStrings[t->nodeKind], t->strval);
@@ -204,10 +212,91 @@ void printAst(tree *t, int level) {
         case MULOP:
             printf("%s,%c\n", nodeTypeStrings[t->nodeKind], t->val == OPER_MUL ? '*' : '/');
             break;
+        case FUNCCALLEXPR:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case ARGLIST:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case FORMALDECLLIST:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case VARDECL:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case FORMALDECL:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case COMPOUNDSTMT:
+            // Don't print "compoundStmt"
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level);  // Note: we're not increasing the level here
+            }
+            break;
+        case ASSIGNSTMT:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case CONDSTMT:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case LOOPSTMT:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case RETURNSTMT:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case VAR:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case RELOP:
+            printf("%s,%s\n", nodeTypeStrings[t->nodeKind], getRelopString(t->val));
+            break;
         default:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
             for (int i = 0; i < t->numChildren; i++) {
                 printAst(t->children[i], level + 1);
             }
+    }
+}
+
+const char* getRelopString(int val) {
+    switch(val) {
+        case OPER_LT: return "<";
+        case OPER_LTE: return "<=";  // Changed from OPER_LE to OPER_LTE
+        case OPER_GT: return ">";
+        case OPER_GTE: return ">=";  // Changed from OPER_GE to OPER_GTE
+        case OPER_EQ: return "==";
+        case OPER_NEQ: return "!=";  // Changed from OPER_NE to OPER_NEQ
+        default: return "unknown";
     }
 }

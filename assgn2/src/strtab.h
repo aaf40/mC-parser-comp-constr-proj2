@@ -3,6 +3,7 @@
 #define MAXIDS 1000
 #define MAX_ID_LENGTH 50
 #define MAX_SCOPE_LENGTH 100
+#define FUNCTION_TYPE 2
 
 /* These enums are used in the parser.y file when creating nodes in the AST corresponding to the 'typeSpecifier' tokens . */
 enum dataType {INT_TYPE, CHAR_TYPE, VOID_TYPE};
@@ -10,7 +11,8 @@ enum dataType {INT_TYPE, CHAR_TYPE, VOID_TYPE};
 /*
 These nums are passed as the last argument to ST_insert when inserting information about variable names, array names, and function names into the symbol table */
 
-enum symbolType {SCALAR, ARRAY, FUNCTION};
+enum symbolType {SCALAR_TYPE, ARRAY_TYPE, FUNCTION};
+#define ERROR_TYPE -1
 
 extern const char* dataTypeStrings[];
 extern const char* symbolTypeStrings[];
@@ -18,11 +20,13 @@ extern const char* types[];
 extern const char* symTypeMod[];
 
 /* This data structure describes each element of the symbol table. */
-struct strEntry{
+struct strEntry {
     char* id;
     char* scope;
     int   data_type;
     int   symbol_type;
+    int   param_count;    // Number of parameters for functions
+    int*  param_types;    // Array of parameter types for functions
 };
 
 /* initialize the symbol table */

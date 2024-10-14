@@ -100,12 +100,15 @@ void output_entry(int i) {
 }
 
 void ST_free() {
-    printf("DEBUG: Starting to free symbol table\n");
-    fflush(stdout);
     for (int i = 0; i < MAXIDS; i++) {
-        free(strTable[i].id);
-        free(strTable[i].scope);
+        if (strTable[i].id != NULL) {
+            free(strTable[i].id);
+        }
+        if (strTable[i].scope != NULL) {
+            free(strTable[i].scope);
+        }
+        if (strTable[i].symbol_type == FUNCTION_TYPE && strTable[i].param_types != NULL) {
+            free(strTable[i].param_types);
+        }
     }
-    printf("DEBUG: Symbol table freed\n");
-    fflush(stdout);
 }
