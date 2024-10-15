@@ -38,7 +38,6 @@ tree* makeTreeNode(nodeKind kind, int value) {
     tree* node = (tree*)malloc(sizeof(tree));
     node->nodeKind = kind;
     node->val = value;
-    // ... other initialization ...
     return node;
 }
 
@@ -81,7 +80,6 @@ void printAstDebug(tree *t, int nestLevel) {
         case TYPESPEC:
             printf("  Type: %d\n", t->val);
             break;
-        // Add cases for other node types as needed
         default:
             printf("  Children: %d\n", t->numChildren);
     }

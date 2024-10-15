@@ -3,10 +3,10 @@
 #include <string.h>
 #include "tree.h"
 #include "strtab.h"
-#include "y.tab.h"  // Add this line
+#include "y.tab.h"
 
 int yyparse(void);
-extern tree *ast;  // Add this line if it's not already present
+extern tree *ast; 
 
 int main() {
     /*printf("DEBUG: Starting main function\n");

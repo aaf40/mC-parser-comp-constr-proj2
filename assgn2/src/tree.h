@@ -20,8 +20,6 @@ struct treenode {
       int numChildren;
       int val;
       char *strval;
-      // Remove or comment out the opType field if it's not needed
-      // int opType;
       tree *parent;
       tree *children[MAXCHILDREN];
 };

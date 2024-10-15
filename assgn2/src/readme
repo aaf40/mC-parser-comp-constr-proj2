@@ -1,1 +1,11 @@
+# Mini-C Compiler
 
+This project implements a compiler for a subset of the C programming language, which we call Mini-C. The compiler includes a lexical analyzer, parser, and abstract syntax tree (AST) generator.
+
+## Components
+
+1. **Lexical Analyzer**: Implemented using Flex (not shown in the provided code snippets).
+2. **Parser**: Implemented using Bison (yacc), defined in `src/parser.y`.
+3. **Abstract Syntax Tree (AST)**: Defined in `src/tree.h` and implemented in `src/tree.c`.
+4. **Symbol Table**: Defined in `src/strtab.h` and implemented in `src/strtab.c`.
+5. **Driver Program**: Implemented in `src/driver.c`.
