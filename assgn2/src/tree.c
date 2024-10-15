@@ -213,6 +213,19 @@ void printAst(tree *t, int level) {
                 printAst(t->children[i], level + 1);
             }
             break;
+        case RELOP:
+            printf("%s,", nodeTypeStrings[t->nodeKind]);
+            switch(t->val) {
+                case OPER_LT:  printf("<"); break;
+                case OPER_LTE: printf("<="); break;
+                case OPER_GT:  printf(">"); break;
+                case OPER_GTE: printf(">="); break;
+                case OPER_EQ:  printf("=="); break;
+                case OPER_NEQ: printf("!="); break;
+                default:       printf("unknown");
+            }
+            printf("\n");
+            break;
         default:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
             for (int i = 0; i < t->numChildren; i++) {
