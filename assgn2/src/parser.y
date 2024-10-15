@@ -129,8 +129,12 @@ funDecl         : typeSpecifier ID LPAREN formalDeclList RPAREN funBody
                     id->strval = $2;
                     addChild(funcTypeName, id);
                     addChild($$, funcTypeName);
-                    addChild($$, $4);
-                    addChild($$, $6);
+                    if ($4->numChildren > 0) {
+                        addChild($$, $4);  // Add formalDeclList only if it has children
+                    } else {
+                        freeAst($4);  // Free the empty FORMALDECLLIST node
+                    }
+                    addChild($$, $6);  // Add funBody
                 }
                 | typeSpecifier ID LPAREN RPAREN funBody
                 {
@@ -141,8 +145,7 @@ funDecl         : typeSpecifier ID LPAREN formalDeclList RPAREN funBody
                     id->strval = $2;
                     addChild(funcTypeName, id);
                     addChild($$, funcTypeName);
-                    addChild($$, maketree(FORMALDECLLIST, 0));
-                    addChild($$, $5);
+                    addChild($$, $5);  // Add funBody
                 }
                 ;
 
@@ -153,10 +156,9 @@ formalDeclList  : formalDecl
                 }
                 | formalDecl COMMA formalDeclList
                 {
-                    tree *newFormalDeclList = maketree(FORMALDECLLIST, 0);
-                    addChild(newFormalDeclList, $1);
-                    addChild(newFormalDeclList, $3);
-                    $$ = newFormalDeclList;
+                    $$ = maketree(FORMALDECLLIST, 0);
+                    addChild($$, $1);
+                    addChild($$, $3);
                 }
                 ;
 

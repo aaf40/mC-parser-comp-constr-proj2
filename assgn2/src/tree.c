@@ -136,9 +136,7 @@ void printAst(tree *t, int level) {
         case FUNDECL:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
             for (int i = 0; i < t->numChildren; i++) {
-                if (t->children[i]->nodeKind != FORMALDECLLIST) {
-                    printAst(t->children[i], level + 1);
-                }
+                printAst(t->children[i], level + 1);
             }
             break;
         case FUNBODY:
@@ -197,6 +195,21 @@ void printAst(tree *t, int level) {
             break;
         case MULOP:
             printf("%s,%c\n", nodeTypeStrings[t->nodeKind], t->val == OPER_MUL ? '*' : '/');
+            break;
+        case FORMALDECLLIST:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case FORMALDECL:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
+            break;
+        case ARRAYDECL:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
             break;
         default:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
