@@ -174,15 +174,16 @@ formalDecl      : typeSpecifier ID
                 {
                     $$ = maketree(FORMALDECL, 0);
                     addChild($$, $1);
-                    tree *arrayDecl = maketree(ARRAYDECL, 0);
-                    arrayDecl->strval = $2;
-                    addChild($$, arrayDecl);
+                    tree *id = maketree(IDENTIFIER, 0);
+                    id->strval = $2;
+                    addChild($$, id);
+                    addChild($$, maketree(ARRAYDECL, 0));
                 }
                 ;
 funBody         : LCRLY_BRKT localDeclList statementList RCRLY_BRKT
                 {
                     $$ = maketree(FUNBODY, 0);
-                    if ($2 != NULL) addChild($$, $2);
+                    if ($2 != NULL && $2->numChildren > 0) addChild($$, $2);
                     if ($3 != NULL) addChild($$, $3);
                 }
                 ;
@@ -191,11 +192,14 @@ localDeclList   : /* empty */
                 {
                     $$ = maketree(LOCALDECLLIST, 0);
                 }
-                | varDecl localDeclList
+                | localDeclList varDecl
                 {
-                    $$ = maketree(LOCALDECLLIST, 0);
-                    addChild($$, $1);
-                    if ($2 != NULL) addChild($$, $2);
+                    if ($1 == NULL) {
+                        $$ = maketree(LOCALDECLLIST, 0);
+                    } else {
+                        $$ = $1;
+                    }
+                    addChild($$, $2);
                 }
                 ;
 

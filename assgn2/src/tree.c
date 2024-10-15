@@ -142,9 +142,7 @@ void printAst(tree *t, int level) {
         case FUNBODY:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
             for (int i = 0; i < t->numChildren; i++) {
-                if (t->children[i]->nodeKind != LOCALDECLLIST) {
-                    printAst(t->children[i], level + 1);
-                }
+                printAst(t->children[i], level + 1);
             }
             break;
         case STATEMENTLIST:
@@ -210,6 +208,12 @@ void printAst(tree *t, int level) {
             break;
         case ARRAYDECL:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            break;
+        case LOCALDECLLIST:
+            printf("%s\n", nodeTypeStrings[t->nodeKind]);
+            for (int i = 0; i < t->numChildren; i++) {
+                printAst(t->children[i], level + 1);
+            }
             break;
         default:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
