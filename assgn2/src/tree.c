@@ -130,9 +130,7 @@ void printAst(tree *t, int level) {
         case DECLLIST:
             printf("%s\n", nodeTypeStrings[t->nodeKind]);
             for (int i = 0; i < t->numChildren; i++) {
-                printIndent(level + 1);
-                printf("decl\n");
-                printAst(t->children[i], level + 2);
+                printAst(t->children[i], level + 1);
             }
             break;
         case FUNDECL:

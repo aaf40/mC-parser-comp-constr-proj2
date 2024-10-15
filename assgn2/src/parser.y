@@ -67,18 +67,22 @@ declList        : decl
                 }
                 | declList decl
                 {
-                    $$ = $1;
-                    addChild($$, $2);
+                    tree *newDeclList = maketree(DECLLIST, 0);
+                    addChild(newDeclList, $1);  // Add the previous declList as a child
+                    addChild(newDeclList, $2);  // Add the new decl as a child
+                    $$ = newDeclList;
                 }
                 ;
 
 decl            : varDecl
                 {
-                    $$ = $1;
+                    $$ = maketree(DECL, 0);
+                    addChild($$, $1);
                 }
                 | funDecl
                 {
-                    $$ = $1;
+                    $$ = maketree(DECL, 0);
+                    addChild($$, $1);
                 }
                 ;
 
@@ -149,9 +153,10 @@ formalDeclList  : formalDecl
                 }
                 | formalDecl COMMA formalDeclList
                 {
-                    $$ = maketree(FORMALDECLLIST, 0);
-                    addChild($$, $1);
-                    addChild($$, $3);
+                    tree *newFormalDeclList = maketree(FORMALDECLLIST, 0);
+                    addChild(newFormalDeclList, $1);
+                    addChild(newFormalDeclList, $3);
+                    $$ = newFormalDeclList;
                 }
                 ;
 
